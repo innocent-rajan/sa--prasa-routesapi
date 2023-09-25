@@ -2,7 +2,7 @@ import os
 
 from flask import Blueprint, request, jsonify
 
-from utils.main import get_routes_func, get_stops_func
+from utils.main import get_routes_func, get_stops_func, get_transit_route_details_func, get_routes_on_stop_func
 
 API_KEY = os.getenv('x-api-key')
 
@@ -30,3 +30,28 @@ def get_routes_api():
 @require_api_key(API_KEY)
 def get_stops_api():
     return get_stops_func()
+
+
+@klb_bp.route('/get_transit_route_details', endpoint='get_transit_route_details')
+@require_api_key(API_KEY)
+def get_transit_route_details():
+    data = None
+    if request.method == 'GET':
+        data = request.values.to_dict()
+    if data is not None:
+        return get_transit_route_details_func(data['route'])
+    else:
+        return 'Wrong route', 400
+
+
+@klb_bp.route('/get_routes_on_stop', endpoint='get_routes_on_stop')
+@require_api_key(API_KEY)
+def get_routes_on_stop():
+    data = None
+    if request.method == 'GET':
+        data = request.values.to_dict()
+    if data is not None:
+        return get_routes_on_stop_func(data['stop_id'])
+    else:
+        return 'Wrong route', 400
+
