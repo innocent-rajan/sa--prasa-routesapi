@@ -169,8 +169,13 @@ def get_routes_on_stop_func(stop_id, time=None):
         query_time = datetime.datetime.now().time()
     else:
         query_time = datetime.datetime.strptime(time, "%H:%M:%S").time()
+    stop = BusStop.query.filter(BusStop.stop_id == stop_id).one()
+    val = BusNextStop.query.all()
+    for v in val:
+        bus_next_stop_dict[v.cur_stop] = v.next_stop_name
     routes = list(set(trips_df[trips_df.trip_id.isin(stop_times_df[stop_times_df.stop_id == int(stop_id)].trip_id.tolist())].route_id.tolist()))
-    routes_on_stop = {'status': '', 'description': ''}
+    routes_on_stop = {'status': '', 'description': '', 'stop_name': stop.stop_name,
+                      'next_stop': bus_next_stop_dict[stop.stop_id], 'updated_at': datetime.datetime.now().time().strftime("%H:%M:%S")}
     upcoming_routes = []
     for route in routes:
         rt = BusRoute.query.filter(BusRoute.route_id == route).one()
