@@ -78,7 +78,7 @@ def get_routes_func():
                     'trips_count': schedule_dict[
                         route.route_long_name] if route.route_long_name in schedule_dict else 0,
                     'agency': route.agency_id,
-                    'trip_schedule': stop_times_df[stop_times_df.trip_id.isin(trips_df[trips_df.route_id == route.route_id].trip_id.tolist())][stop_times_df.stop_sequence == 0].arrival_time.tolist()
+                    'trips_schedule': stop_times_df[stop_times_df.trip_id.isin(trips_df[trips_df.route_id == route.route_id].trip_id.tolist())][stop_times_df.stop_sequence == 0].arrival_time.tolist()
                 }
                 for route in routes
             ]
@@ -107,7 +107,7 @@ def get_stops_func():
                     'id': stop.stop_id,
                     'name': stop.stop_name,
                     'lat': float(stop.stop_lat),
-                    'lng': float(stop.stop_lon),
+                    'lon': float(stop.stop_lon),
                     'next_stop': bus_next_stop_dict[stop.stop_id]
                 }
                 for stop in stops
@@ -161,22 +161,25 @@ def get_transit_route_details_func(route):
         return jsonify(transit_routes), 400
 
 
-def get_routes_on_stop_func(stop_id):
+def get_routes_on_stop_func(stop_id, time=None):
     val = BusRoutesDetail.query.all()
     for v in val:
         bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
-    current_time = datetime.datetime.now().time()
+    if time is None:
+        query_time = datetime.datetime.now().time()
+    else:
+        query_time = datetime.datetime.strptime(time, "%H:%M:%S").time()
     routes = list(set(trips_df[trips_df.trip_id.isin(stop_times_df[stop_times_df.stop_id == int(stop_id)].trip_id.tolist())].route_id.tolist()))
     routes_on_stop = {'status': '', 'description': ''}
-    upcoming_routes = {}
+    upcoming_routes = []
     for route in routes:
         rt = BusRoute.query.filter(BusRoute.route_id == route).one()
         trip_schedule = get_trip_schedules(rt.route_id)
         trip_times = [datetime.datetime.strptime(time_str, "%H:%M:%S").time() for time_str in trip_schedule]
-        upcoming_times = sorted([time for time in trip_times if time > current_time])
+        upcoming_times = sorted([time for time in trip_times if time > query_time])
         next_two_times = [time.strftime("%H:%M:%S") for time in upcoming_times[:2]]
-        upcoming_routes[rt.route_long_name] = {'upcoming_trips_schedule': next_two_times,
-                                               'end_stop': bus_stops_dict[bus_route_details_dict[rt.route_id][1]]}
+        upcoming_routes.append({'route' : rt.route_long_name , 'upcoming_trips_schedule': next_two_times,
+                                               'end_stop': bus_stops_dict[bus_route_details_dict[rt.route_id][1]]})
 
     if len(upcoming_routes) > 0:
         routes_on_stop['routes'] = upcoming_routes

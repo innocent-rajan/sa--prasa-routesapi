@@ -51,7 +51,7 @@ def get_routes_on_stop():
     if request.method == 'GET':
         data = request.values.to_dict()
     if data is not None:
-        return get_routes_on_stop_func(data['stop_id'])
+        return get_routes_on_stop_func(data['stop_id'], data['time'] if 'time' in data.keys() else None)
     else:
         return 'Wrong route', 400
 
