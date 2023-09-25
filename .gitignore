@@ -1,0 +1,11 @@
+/static/
+/db.sqlite3
+/users.sqlite3
+.env
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/routesapi.iml
+/.idea/vcs.xml
