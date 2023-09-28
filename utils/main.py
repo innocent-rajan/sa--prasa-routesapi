@@ -78,7 +78,7 @@ def get_routes_func():
                     'trips_count': schedule_dict[
                         route.route_long_name] if route.route_long_name in schedule_dict else 0,
                     'agency': route.agency_id,
-                    'trips_schedule': stop_times_df[stop_times_df.trip_id.isin(trips_df[trips_df.route_id == route.route_id].trip_id.tolist())][stop_times_df.stop_sequence == 0].arrival_time.tolist()
+                    'trips_schedule': get_trip_schedules(route.route_id)
                 }
                 for route in routes
             ]
@@ -180,9 +180,9 @@ def get_routes_on_stop_func(stop_id, time=None):
     for route in routes:
         rt = BusRoute.query.filter(BusRoute.route_id == route).one()
         trip_schedule = get_trip_schedules(rt.route_id)
-        trip_times = [datetime.datetime.strptime(time_str, "%H:%M:%S").time() for time_str in trip_schedule]
+        trip_times = [datetime.datetime.strptime(time_str, "%H:%M").time() for time_str in trip_schedule]
         upcoming_times = sorted([time for time in trip_times if time > query_time])
-        next_two_times = [time.strftime("%H:%M:%S") for time in upcoming_times[:2]]
+        next_two_times = [time.strftime("%H:%M") for time in upcoming_times[:2]]
         upcoming_routes.append({'route' : rt.route_long_name , 'upcoming_trips_schedule': next_two_times,
                                                'end_stop': bus_stops_dict[bus_route_details_dict[rt.route_id][1]]})
 
@@ -198,8 +198,13 @@ def get_routes_on_stop_func(stop_id, time=None):
 
 
 def get_trip_schedules(route_id):
-    return stop_times_df[stop_times_df.trip_id.isin(trips_df[trips_df.route_id == route_id].trip_id.tolist())][
-        stop_times_df.stop_sequence == 0].arrival_time.tolist()
+    return [convert_to_h_m(x) for x in stop_times_df[stop_times_df.trip_id.isin(trips_df[trips_df.route_id == route_id].trip_id.tolist())][
+        stop_times_df.stop_sequence == 0].arrival_time.tolist()]
+
+
+def convert_to_h_m(time):
+    time_obj = datetime.datetime.strptime(time, "%H:%M:%S")
+    return time_obj.strftime("%H:%M")
 
 
 if __name__ == '__main__':
