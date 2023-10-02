@@ -130,7 +130,8 @@ def get_transit_route_details_func(route):
     try:
         route = BusRoute.query.filter(BusRoute.route_id == route).one()
         transit_routes = {
-            'description': 'success',
+            'status': 'success',
+            'description': '',
             'transit_route': [
                 {
                     'id': route.route_id,
