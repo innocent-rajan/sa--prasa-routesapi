@@ -1,5 +1,5 @@
 /static/
-/db.sqlite3
+/instance/db.sqlite3
 /users.sqlite3
 .env
 /.idea/inspectionProfiles/profiles_settings.xml
@@ -10,3 +10,5 @@
 /.idea/routesapi.iml
 /.idea/vcs.xml
 /.idea/*
+/venv/
+/instance/
