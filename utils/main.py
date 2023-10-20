@@ -207,5 +207,70 @@ def convert_to_h_m(time):
     return time_obj.strftime("%H:%M")
 
 
+def make_combined_response():
+    routes_data = []
+    routes = BusRoute.query.all()
+    for route in routes:
+        route_id = route.route_id
+        stops = [{'stop_id': x[0], 'name': x[1], 'lat': float(x[2]), 'lon': float(x[3])} for x in
+                              ast.literal_eval(
+                                  BusAllRoute.query.filter_by(route_id=route.route_id).one().stops_details)]
+        # route_details = BusRoute.query.filter(BusRoute.route_id == route_id).one()
+        route_long_name = route.route_long_name
+        only_route, direction = get_direction(route_long_name)
+        start_stop = stops[0]['name']
+        end_stop = stops[-1]['name']
+        trips_schedule = get_trip_schedules(route_id)
+        trips_count = len(trips_schedule)
+
+        route_data = {
+            'id': None if route_id is None else route_id,
+            'direction': None if direction is None else direction,
+            'route': None if only_route is None else only_route,
+            'short_name': None,
+            'long_name': None if route_long_name is None else route_long_name,
+            'polyline': None,
+            'city': 'klb',
+            'state': 'KA',
+            'type': 'bus',
+            'trips_schedule': [] if trips_schedule is None else trips_schedule,
+            'stops': [x['stop_id'] for x in stops],
+            'stops_distance': ast.literal_eval(
+                BusRouteStopDistance.query.filter_by(route_id=route.route_id).one().
+                    stops_distances),
+            'agency': route.agency_id,
+            'end': None if end_stop is None else end_stop,
+            'start': [] if start_stop is None else start_stop,
+            'trips_count': None if trips_count is None else trips_count,
+        }
+        routes_data.append(route_data)
+
+    val = BusNextStop.query.all()
+    for v in val:
+        bus_next_stop_dict[v.cur_stop] = v.next_stop_name
+
+    stops = BusStop.query.all()
+    stops_data = [
+        {
+            'id': stop.stop_id,
+            'name': stop.stop_name,
+            'lat': float(stop.stop_lat),
+            'lon': float(stop.stop_lon),
+            'next_stop': bus_next_stop_dict[stop.stop_id]
+        }
+        for stop in stops
+    ]
+
+    response = {
+        'status': 'success',
+        'description': '',
+        'routes': routes_data,
+        'stops': stops_data
+    }
+
+    print(routes_data[0])
+    return jsonify(response), 200
+
+
 if __name__ == '__main__':
     pass

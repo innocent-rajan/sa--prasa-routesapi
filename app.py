@@ -2,8 +2,10 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
+from flask_compress import Compress
 
 from blueprints.klb.apis import klb_bp
+from db_operations.models_file import BusNextStop
 from exts import db
 
 load_dotenv()
@@ -11,12 +13,14 @@ load_dotenv()
 API_KEY = os.getenv('x-api-key')
 SECRET_KEY = os.getenv('secret-key')
 
+
 def register_extensions(app):
     db.init_app(app)
 
 
 def create_app():
     app = Flask(__name__)
+    Compress(app)
     app.config.from_pyfile('config.cfg')
     app.config['SECRET_KEY'] = SECRET_KEY
     register_extensions(app)
@@ -25,6 +29,9 @@ def create_app():
 
 
 app = create_app()
+
+bus_next_stop_dict = {}
+
 
 def require_api_key(api_key):
     def decorator(func):
@@ -36,6 +43,7 @@ def require_api_key(api_key):
                 return jsonify({'message': 'Unauthorized'}), 401
 
         return wrapper
+
     return decorator
 
 
@@ -47,7 +55,6 @@ def require_api_key(api_key):
 @app.route('/')
 def home():
     return 'Welcome to home', 200
-
 
 # @app.route('/klb/get_routes')
 # @require_api_key(API_KEY)
