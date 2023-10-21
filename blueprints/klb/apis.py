@@ -5,6 +5,10 @@ from flask import Blueprint, request, jsonify
 from utils.main import get_routes_func, get_stops_func, get_transit_route_details_func, get_routes_on_stop_func, \
     make_combined_response
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 API_KEY = os.getenv('x-api-key')
 
 klb_bp = Blueprint('klb', __name__)
