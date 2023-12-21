@@ -17,10 +17,10 @@ column_data_types = {
 }
 
 gtfs_folder = 'static/data/GTFS/'
-routes_df = pd.read_csv(gtfs_folder+'routes.txt')
-stops_df = pd.read_csv(gtfs_folder+'stops.txt', dtype=column_data_types)
-trips_df = pd.read_csv(gtfs_folder+'trips.txt')
-stop_times_df = pd.read_csv(gtfs_folder+'stop_times.txt')
+routes_df = pd.read_csv(gtfs_folder + 'routes.txt')
+stops_df = pd.read_csv(gtfs_folder + 'stops.txt', dtype=column_data_types)
+trips_df = pd.read_csv(gtfs_folder + 'trips.txt')
+stop_times_df = pd.read_csv(gtfs_folder + 'stop_times.txt')
 
 bus_stops_dict = dict(zip(stops_df.stop_id, stops_df.stop_name))
 bus_route_details_dict = dict()
@@ -31,10 +31,10 @@ schedule_dict = dict()
 # app = create_app()
 
 # def get_route_details():
-    # with app.app_context():
-    # val = BusRoutesDetail.query.all()
-    # for v in val:
-    #     bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
+# with app.app_context():
+# val = BusRoutesDetail.query.all()
+# for v in val:
+#     bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
 
 # get_route_details()
 
@@ -147,7 +147,7 @@ def get_transit_route_details_func(route):
                                   BusAllRoute.query.filter_by(route_id=route.route_id).one().stops_details)],
                     'stops_distance': ast.literal_eval(
                         BusRouteStopDistance.query.filter_by(route_id=route.route_id).one().
-                            stops_distances),
+                        stops_distances),
                     'trips_schedule': get_trip_schedules(route.route_id)
                 }
             ]
@@ -174,9 +174,11 @@ def get_routes_on_stop_func(stop_id, time=None):
     val = BusNextStop.query.all()
     for v in val:
         bus_next_stop_dict[v.cur_stop] = v.next_stop_name
-    routes = list(set(trips_df[trips_df.trip_id.isin(stop_times_df[stop_times_df.stop_id == int(stop_id)].trip_id.tolist())].route_id.tolist()))
+    routes = list(set(trips_df[trips_df.trip_id.isin(
+        stop_times_df[stop_times_df.stop_id == stop_id].trip_id.tolist())].route_id.tolist()))
     routes_on_stop = {'status': '', 'description': '', 'stop_name': stop.stop_name,
-                      'next_stop': bus_next_stop_dict[stop.stop_id], 'updated_at': datetime.datetime.now().time().strftime("%H:%M:%S")}
+                      'next_stop': bus_next_stop_dict[stop.stop_id],
+                      'updated_at': datetime.datetime.now().time().strftime("%H:%M:%S")}
     upcoming_routes = []
     for route in routes:
         rt = BusRoute.query.filter(BusRoute.route_id == route).one()
@@ -184,8 +186,12 @@ def get_routes_on_stop_func(stop_id, time=None):
         trip_times = [datetime.datetime.strptime(time_str, "%H:%M").time() for time_str in trip_schedule]
         upcoming_times = sorted([time for time in trip_times if time > query_time])
         next_two_times = [time.strftime("%H:%M") for time in upcoming_times[:2]]
-        upcoming_routes.append({'route' : rt.route_long_name , 'upcoming_trips_schedule': next_two_times,
-                                               'end_stop': bus_stops_dict[bus_route_details_dict[rt.route_id][1]]})
+        if len(next_two_times) == 0:
+            next_two_times.append("NA")
+        upcoming_routes.append({'route': rt.route_long_name, 'upcoming_trips_schedule': next_two_times,
+                                'end_stop': bus_stops_dict[bus_route_details_dict[rt.route_id][1]]})
+
+    upcoming_routes = sorted(upcoming_routes, key=lambda x: x["upcoming_trips_schedule"][0] if x["upcoming_trips_schedule"] else "")
 
     if len(upcoming_routes) > 0:
         routes_on_stop['routes'] = upcoming_routes
@@ -199,8 +205,9 @@ def get_routes_on_stop_func(stop_id, time=None):
 
 
 def get_trip_schedules(route_id):
-    return [convert_to_h_m(x) for x in stop_times_df[stop_times_df.trip_id.isin(trips_df[trips_df.route_id == route_id].trip_id.tolist())][
-        stop_times_df.stop_sequence == 0].arrival_time.tolist()]
+    return [convert_to_h_m(x) for x in
+            stop_times_df[stop_times_df.trip_id.isin(trips_df[trips_df.route_id == route_id].trip_id.tolist())][
+                stop_times_df.stop_sequence == 0].arrival_time.tolist()]
 
 
 def convert_to_h_m(time):
@@ -214,8 +221,8 @@ def make_combined_response():
     for route in routes:
         route_id = route.route_id
         stops = [{'stop_id': x[0], 'name': x[1], 'lat': float(x[2]), 'lon': float(x[3])} for x in
-                              ast.literal_eval(
-                                  BusAllRoute.query.filter_by(route_id=route.route_id).one().stops_details)]
+                 ast.literal_eval(
+                     BusAllRoute.query.filter_by(route_id=route.route_id).one().stops_details)]
         # route_details = BusRoute.query.filter(BusRoute.route_id == route_id).one()
         route_long_name = route.route_long_name
         only_route, direction = get_direction(route_long_name)
@@ -238,7 +245,7 @@ def make_combined_response():
             'stops': [x['stop_id'] for x in stops],
             'stops_distance': ast.literal_eval(
                 BusRouteStopDistance.query.filter_by(route_id=route.route_id).one().
-                    stops_distances),
+                stops_distances),
             'agency': route.agency_id,
             'end': None if end_stop is None else end_stop,
             'start': [] if start_stop is None else start_stop,
