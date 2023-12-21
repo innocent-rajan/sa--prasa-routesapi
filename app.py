@@ -5,7 +5,6 @@ from flask import Flask, request, jsonify
 from flask_compress import Compress
 
 from blueprints.klb.apis import klb_bp
-from db_operations.models_file import BusNextStop
 from exts import db
 
 load_dotenv()
@@ -55,8 +54,3 @@ def require_api_key(api_key):
 @app.route('/')
 def home():
     return 'Welcome to home', 200
-
-# @app.route('/klb/get_routes')
-# @require_api_key(API_KEY)
-# def get_routes():
-#     return 'welcome to get_routes'
