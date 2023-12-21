@@ -174,7 +174,7 @@ def get_routes_on_stop_func(stop_id, time=None):
     for v in val:
         bus_next_stop_dict[v.cur_stop] = v.next_stop_name
     routes = list(set(trips_df[trips_df.trip_id.isin(
-        stop_times_df[stop_times_df.stop_id == int(stop_id)].trip_id.tolist())].route_id.tolist()))
+        stop_times_df[stop_times_df.stop_id == stop_id].trip_id.tolist())].route_id.tolist()))
     routes_on_stop = {'status': '', 'description': '', 'stop_name': stop.stop_name,
                       'next_stop': bus_next_stop_dict[stop.stop_id],
                       'updated_at': datetime.datetime.now().time().strftime("%H:%M:%S")}
@@ -189,6 +189,8 @@ def get_routes_on_stop_func(stop_id, time=None):
             next_two_times.append("NA")
         upcoming_routes.append({'route': rt.route_long_name, 'upcoming_trips_schedule': next_two_times,
                                 'end_stop': bus_stops_dict[bus_route_details_dict[rt.route_id][1]]})
+
+    upcoming_routes = sorted(upcoming_routes, key=lambda x: x["upcoming_trips_schedule"][0] if x["upcoming_trips_schedule"] else "")
 
     if len(upcoming_routes) > 0:
         routes_on_stop['routes'] = upcoming_routes
