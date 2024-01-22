@@ -36,7 +36,7 @@ def require_api_key(api_key):
     def decorator(func):
         def wrapper(*args, **kwargs):
             request_api_key = request.headers.get('x-api-key')
-            if request_api_key == api_key:
+            if request_api_key in api_key:
                 return func(*args, **kwargs)
             else:
                 return jsonify({'message': 'Unauthorized'}), 401
