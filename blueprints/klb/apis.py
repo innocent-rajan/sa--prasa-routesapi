@@ -18,7 +18,7 @@ def require_api_key(api_key):
     def decorator(func):
         def wrapper(*args, **kwargs):
             request_api_key = request.headers.get('x-api-key')
-            if request_api_key == api_key:
+            if request_api_key in api_key:
                 return func(*args, **kwargs)
             else:
                 return jsonify({'message': 'Unauthorized'}), 401
@@ -29,7 +29,7 @@ def require_api_key(api_key):
 
 
 @klb_bp.route('/get_routes', endpoint='get_routes_api')
-@require_api_key(API_KEY)
+# @require_api_key(API_KEY)
 def get_routes_api():
     return get_routes_func()
 
@@ -47,7 +47,7 @@ def get_stops_api():
 
 
 @klb_bp.route('/get_transit_route_details', endpoint='get_transit_route_details')
-@require_api_key(API_KEY)
+# @require_api_key(API_KEY)
 def get_transit_route_details():
     data = None
     if request.method == 'GET':
