@@ -21,6 +21,7 @@ routes_df = pd.read_csv(gtfs_folder + 'routes.txt')
 stops_df = pd.read_csv(gtfs_folder + 'stops.txt', dtype=column_data_types)
 trips_df = pd.read_csv(gtfs_folder + 'trips.txt')
 stop_times_df = pd.read_csv(gtfs_folder + 'stop_times.txt')
+polylines_df = pd.read_csv(gtfs_folder + 'polylines.csv')
 
 bus_stops_dict = dict(zip(stops_df.stop_id, stops_df.stop_name))
 bus_route_details_dict = dict()
@@ -57,6 +58,10 @@ def get_direction(route_long_name):
     return route, direction
 
 
+def get_polyline(route_id):
+    return '' if len(polylines_df[polylines_df.route_id == route_id].polyline.squeeze()) == 0 else polylines_df[polylines_df.route_id == route_id].polyline.squeeze()
+
+
 def get_routes_func():
     val = BusRoutesDetail.query.all()
     for v in val:
@@ -75,6 +80,7 @@ def get_routes_func():
                     'direction': get_direction(route.route_long_name)[1],
                     'start': bus_stops_dict[bus_route_details_dict[route.route_id][0]],
                     'end': bus_stops_dict[bus_route_details_dict[route.route_id][1]],
+                    'polyline': get_polyline(route.route_id),
                     'trips_count': schedule_dict[
                         route.route_long_name] if route.route_long_name in schedule_dict else 0,
                     'agency': route.agency_id,
@@ -83,6 +89,8 @@ def get_routes_func():
                 for route in routes
             ]
         }
+        for val in all_routes['routes']:
+            print({k:(v, type(v)) for k,v in val.items()})
         return jsonify(all_routes), 200
     except Exception as e:
         print(e)
@@ -140,7 +148,7 @@ def get_transit_route_details_func(route):
                     'long_name': f'{route.route_long_name} towards {bus_stops_dict[bus_route_details_dict[route.route_id][1]]}',
                     'direction': get_direction(route.route_long_name)[1],
                     'interchanges': 'nan',
-                    'polyline': '',
+                    'polyline': get_polyline(route.route_id),
                     'stops': [{'stop_id': x[0], 'name': x[1], 'lat': float(x[2]), 'lon': float(x[3])} for x in
                               ast.literal_eval(
                                   BusAllRoute.query.filter_by(route_id=route.route_id).one().stops_details)],
@@ -236,7 +244,7 @@ def make_combined_response():
             'route': None if only_route is None else only_route,
             'short_name': None,
             'long_name': None if route_long_name is None else route_long_name,
-            'polyline': None,
+            'polyline': get_polyline(route.route_id),
             'city': 'klb',
             'state': 'KA',
             'type': 'bus',

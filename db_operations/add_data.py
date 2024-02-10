@@ -4,12 +4,14 @@ import datetime
 import geopy.distance
 import pandas as pd
 
+from app import app
 from exts import db
 from db_operations.models_file import BusRoute, BusTrip, BusStopTime, BusStop, BusAllRoute, BusRoutesDetail, \
     BusNextStop, BusRouteStopDistance, UsersActivity
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
+import polyline
 
 static_path_bus = 'static/data/GTFS/'
 
@@ -17,18 +19,20 @@ bus_routes_df = pd.read_csv(static_path_bus + 'routes.txt')
 bus_stops_df = pd.read_csv(static_path_bus + 'stops.txt')
 bus_trips_df = pd.read_csv(static_path_bus + 'trips.txt')
 bus_stop_times_df = pd.read_csv(static_path_bus + 'stop_times.txt')
+bus_shapes_df = pd.read_csv(static_path_bus + 'shapes.txt')
 
 
 def add_routes_bus():
-    val = bus_routes_df.to_dict('records')
-    with db.engine.begin() as conn:
-        try:
-            conn.execute(BusRoute.__table__.insert(), val)
-            conn.execute(text('CREATE INDEX ix_bus_routes_route_id_index ON bus_route (route_id)'))
-            conn.commit()
-        except Exception as e:
-            print(f'add_routes_bus {e}')
-    print("Added routes.")
+    with app.app_context():
+        val = bus_routes_df.to_dict('records')
+        with db.engine.begin() as conn:
+            try:
+                conn.execute(BusRoute.__table__.insert(), val)
+                conn.execute(text('CREATE INDEX ix_bus_routes_route_id_index ON bus_route (route_id)'))
+                conn.commit()
+                print("Added routes.")
+            except Exception as e:
+                print(f'add_routes_bus {e}')
 
 
 def add_stops_bus():
@@ -342,6 +346,40 @@ def add_user_activity(device_id, end_point, params=None, location=None, session_
         conn.commit()
 
 
+def generate_polylines():
+    merged_df = pd.merge(bus_trips_df, bus_shapes_df, on='shape_id', how='inner')
+
+    merged_df = merged_df.drop_duplicates(subset=['route_id', 'shape_pt_sequence'])
+    # Group by route_id
+    grouped = merged_df.groupby('route_id')
+
+    # Initialize empty lists to store route_ids and polylines
+    route_ids = []
+    polylines = []
+
+    # Iterate over groups
+    for route_id, group in grouped:
+        # Concatenate latitude and longitude into a list of tuples
+        points = list(zip(group['shape_pt_lat'], group['shape_pt_lon']))
+
+        # Encode the polyline
+        encoded_polyline = polyline.encode(points)
+
+        if not encoded_polyline:
+            encoded_polyline = ''
+
+        if route_id not in route_ids:
+            # Append route_id and encoded polyline to lists
+            route_ids.append(route_id)
+            polylines.append(encoded_polyline)
+
+    # Create DataFrame from lists
+    polyline_df = pd.DataFrame({'route_id': route_ids, 'polyline': polylines})
+    polyline_df.to_csv(static_path_bus+'polylines.csv', index=False)
+
+    return polyline_df
+
+
 def set_data():
     add_routes_bus()
     add_stops_bus()
@@ -351,3 +389,6 @@ def set_data():
     set_route_details_bus()
     set_transit_route_stops_dist_bus()
     set_next_stop_bus()
+    generate_polylines()
+
+# set_data()
