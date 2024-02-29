@@ -380,6 +380,19 @@ def generate_polylines():
     return polyline_df
 
 
+def generate_bus_route_details():
+    headers = ['start', 'start_id', 'end', 'end_id', 'lat', 'lng', 'route_id_id']
+    val = []
+    for r in bus_routes_df.route_id:
+        ar = BusAllRoute.query.filter_by(route_id=r).first().stops_details
+        arv = ast.literal_eval(ar)
+        start = BusStop.query.filter_by(stop_id=arv[0][0]).first()
+        end = BusStop.query.filter_by(stop_id=arv[-1][0]).first()
+        val.append([start.stop_name, start.stop_id, end.stop_name, end.stop_id, end.stop_lat, end.stop_lon, r])
+    df = pd.DataFrame([dict(zip(headers, x)) for x in val])
+    df.to_csv(static_path_bus+'bus_route_details.csv', index_label='id', columns=headers)
+
+
 def set_data():
     add_routes_bus()
     add_stops_bus()
@@ -390,5 +403,6 @@ def set_data():
     set_transit_route_stops_dist_bus()
     set_next_stop_bus()
     generate_polylines()
+    generate_bus_route_details()
 
 # set_data()
