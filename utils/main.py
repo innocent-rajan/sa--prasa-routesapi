@@ -59,7 +59,8 @@ def get_direction(route_long_name):
 
 
 def get_polyline(route_id):
-    return '' if len(polylines_df[polylines_df.route_id == route_id].polyline.squeeze()) == 0 else polylines_df[polylines_df.route_id == route_id].polyline.squeeze()
+    return '' if len(polylines_df[polylines_df.route_id == route_id].polyline.squeeze()) == 0 else \
+        polylines_df[polylines_df.route_id == route_id].polyline.squeeze()
 
 
 def get_routes_func():
@@ -76,6 +77,7 @@ def get_routes_func():
                     'id': route.route_id,
                     'short_name': 'nan',
                     'long_name': route.route_long_name,
+                    'description': route.route_desc,
                     'route': get_direction(route.route_long_name)[0],
                     'direction': get_direction(route.route_long_name)[1],
                     'start': bus_stops_dict[bus_route_details_dict[route.route_id][0]],
@@ -233,6 +235,7 @@ def make_combined_response():
                      BusAllRoute.query.filter_by(route_id=route.route_id).one().stops_details)]
         # route_details = BusRoute.query.filter(BusRoute.route_id == route_id).one()
         route_long_name = route.route_long_name
+        route_description = route.route_desc
         only_route, direction = get_direction(route_long_name)
         start_stop = stops[0]['name']
         end_stop = stops[-1]['name']
@@ -245,6 +248,7 @@ def make_combined_response():
             'route': None if only_route is None else only_route,
             'short_name': None,
             'long_name': None if route_long_name is None else route_long_name,
+            'description': None if route_description is None else route_description,
             'polyline': get_polyline(route.route_id),
             'city': 'klb',
             'state': 'KA',

@@ -7,6 +7,7 @@ class BusRoute(db.Model):
     route_id = db.Column(db.String, primary_key=True)
     route_short_name = db.Column(db.String(), nullable=True)
     route_long_name = db.Column(db.String())
+    route_desc = db.Column(db.String())
     route_type = db.Column(db.Integer)
     agency_id = db.Column(db.String())
 
