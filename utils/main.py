@@ -85,14 +85,12 @@ def get_routes_func():
                     'polyline': get_polyline(route.route_id),
                     'trips_count': schedule_dict[
                         route.route_long_name] if route.route_long_name in schedule_dict else 0,
-                    'agency': route.agency_id,
-                    'trips_schedule': get_trip_schedules(route.route_id)
+                    'agency': route.agency_id
+                    # 'trips_schedule': get_trip_schedules(route.route_id)
                 }
                 for route in routes
             ]
         }
-        for val in all_routes['routes']:
-            print({k:(v, type(v)) for k,v in val.items()})
         return jsonify(all_routes), 200
     except Exception as e:
         print(e)
@@ -192,7 +190,7 @@ def get_routes_on_stop_func(stop_id, time=None):
     upcoming_routes = []
     for route in routes:
         rt = BusRoute.query.filter(BusRoute.route_id == route).one()
-        trip_schedule = get_trip_schedules(rt.route_id)
+        trip_schedule = get_trip_schedules(rt.route_id, int(stop_id))
         trip_times = [datetime.datetime.strptime(time_str, "%H:%M").time() for time_str in trip_schedule]
         upcoming_times = sorted([time for time in trip_times if time > query_time])
         next_two_times = [time.strftime("%H:%M") for time in upcoming_times[:2]]
@@ -214,10 +212,10 @@ def get_routes_on_stop_func(stop_id, time=None):
     return jsonify(routes_on_stop), 400
 
 
-def get_trip_schedules(route_id):
-    return [convert_to_h_m(x) for x in
-            stop_times_df[stop_times_df.trip_id.isin(trips_df[trips_df.route_id == route_id].trip_id.tolist())][
-                stop_times_df.stop_sequence == 0].arrival_time.tolist()]
+def get_trip_schedules(route_id, stop_id=0):
+    return [convert_to_h_m(x) for x in stop_times_df.loc[
+            stop_times_df.trip_id.isin(trips_df[trips_df.route_id == int(route_id)].trip_id.tolist()) &
+            (stop_times_df.stop_sequence == stop_id), 'arrival_time'].tolist()]
 
 
 def convert_to_h_m(time):
@@ -250,7 +248,7 @@ def make_combined_response():
             'long_name': None if route_long_name is None else route_long_name,
             'description': None if route_description is None else route_description,
             'polyline': get_polyline(route.route_id),
-            'city': 'klb',
+            'city': 'pmpml',
             'state': 'KA',
             'type': 'bus',
             'trips_schedule': [] if trips_schedule is None else trips_schedule,
@@ -288,7 +286,6 @@ def make_combined_response():
         'stops': stops_data
     }
 
-    print(routes_data[0])
     return jsonify(response), 200
 
 

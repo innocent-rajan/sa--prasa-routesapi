@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_compress import Compress
 
-from blueprints.klb.apis import klb_bp
+from blueprints.pmpml.apis import pmpml_bp
 from exts import db
+
+# from werkzeug.middleware.profiler import ProfilerMiddleware
 
 load_dotenv()
 
@@ -23,31 +25,17 @@ def create_app():
     app.config.from_pyfile('config.cfg')
     app.config['SECRET_KEY'] = SECRET_KEY
     register_extensions(app)
-    app.register_blueprint(klb_bp, url_prefix='/klb')
+    app.register_blueprint(pmpml_bp, url_prefix='/pmpml')
     return app
 
 
 app = create_app()
+# app.wsgi_app = ProfilerMiddleware(app.wsgi_app, profile_dir='./profs', filename_format="{method}.{path}.prof")
 
 bus_next_stop_dict = {}
 
 
 # from db_operations.add_data import set_data
-
-
-def require_api_key(api_key):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            request_api_key = request.headers.get('x-api-key')
-            if request_api_key in api_key:
-                return func(*args, **kwargs)
-            else:
-                return jsonify({'message': 'Unauthorized'}), 401
-
-        return wrapper
-
-    return decorator
-
 
 # with app.app_context():
 #     db.create_all()

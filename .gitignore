@@ -1,4 +1,3 @@
-/static/
 /instance/db.sqlite3
 /users.sqlite3
 .env

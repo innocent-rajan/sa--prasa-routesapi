@@ -11,7 +11,7 @@ load_dotenv()
 
 API_KEY = os.getenv('x-api-key')
 
-klb_bp = Blueprint('klb', __name__)
+pmpml_bp = Blueprint('pmpml', __name__)
 
 
 def require_api_key(api_key):
@@ -28,25 +28,25 @@ def require_api_key(api_key):
     return decorator
 
 
-@klb_bp.route('/get_routes', endpoint='get_routes_api')
+@pmpml_bp.route('/get_routes', endpoint='get_routes_api')
 @require_api_key(API_KEY)
 def get_routes_api():
     return get_routes_func()
 
 
-@klb_bp.route('/get_complete_info', endpoint='get_complete_routes_info')
+@pmpml_bp.route('/get_complete_info', endpoint='get_complete_routes_info')
 @require_api_key(API_KEY)
 def get_routes_api():
     return make_combined_response()
 
 
-@klb_bp.route('/get_stops', endpoint='get_stops_api')
+@pmpml_bp.route('/get_stops', endpoint='get_stops_api')
 @require_api_key(API_KEY)
 def get_stops_api():
     return get_stops_func()
 
 
-@klb_bp.route('/get_transit_route_details', endpoint='get_transit_route_details')
+@pmpml_bp.route('/get_transit_route_details', endpoint='get_transit_route_details')
 @require_api_key(API_KEY)
 def get_transit_route_details():
     data = None
@@ -58,13 +58,13 @@ def get_transit_route_details():
         return 'Wrong route', 400
 
 
-@klb_bp.route('/get_routes_on_stop', endpoint='get_routes_on_stop')
+@pmpml_bp.route('/get_routes_on_stop', endpoint='get_routes_on_stop')
 @require_api_key(API_KEY)
 def get_routes_on_stop():
     data = None
     if request.method == 'GET':
         data = request.values.to_dict()
     if data is not None:
-        return get_routes_on_stop_func(data['stop_id'], data['time'] if 'time' in data.keys() else None)
+        return get_routes_on_stop_func(int(data['stop_id']), data['time'] if 'time' in data.keys() else None)
     else:
         return 'Wrong route', 400

@@ -1,3 +1,5 @@
+from sqlalchemy import UniqueConstraint
+
 from exts import db
 
 
@@ -60,6 +62,7 @@ class BusStopTime(db.Model):
     departure_time = db.Column(db.String())
     stop_id = db.Column(db.String(), db.ForeignKey('bus_stop.stop_id'))
     stop_sequence = db.Column(db.Integer)
+    __table_args__ = (UniqueConstraint("trip_id", "stop_sequence", name="unique_trip_id_stop_sequence"),)
 
     def __repr__(self):
         return f"<BusStopTimes {self.trip_id}, {self.route_id}>"
@@ -96,8 +99,8 @@ class BusNextStop(db.Model):
 
 class BusRouteStopDistance(db.Model):
     __bind_key__ = 'data-db'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    route_id = db.Column(db.String(), db.ForeignKey('bus_route.route_id'), nullable=False)
+    id = db.Column(db.Integer, autoincrement=True)
+    route_id = db.Column(db.String(), db.ForeignKey('bus_route.route_id'), nullable=False, primary_key=True)
     stops_distances = db.Column(db.String(1000))
 
     def __repr__(self):
