@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_KEY = os.getenv('x-api-key')
+gtfs_zip_path = os.getenv('gtfs_zip_path')
+gtfs_single_zip_path = os.getenv('gtfs_single_zip_path')
 
 pmpml_bp = Blueprint('pmpml', __name__)
 
@@ -74,21 +76,19 @@ def get_routes_on_stop():
 def get_gtfs_zip():
     # To zip use
     # zip -9 pmpml_gtfs_.zip routes.txt shapes.txt stops.txt stop_times.txt trips.txt
-    path_to_zip = 'static/data/GTFS/gtfs.zip'
 
-    if not os.path.exists(path_to_zip):
+    if not os.path.exists(gtfs_zip_path):
         return "File not found.", 404
 
-    return send_file(path_to_zip, as_attachment=True, download_name='pmpml_gtfs.zip')
+    return send_file(gtfs_zip_path, as_attachment=True, download_name='pmpml_gtfs.zip')
 
 
 @pmpml_bp.route('/gtfs_zip/single', endpoint='get_gtfs_single_zip')
 def get_gtfs_single_zip():
     # To zip use
     # zip -9 pmpml_gtfs_.zip routes.txt shapes.txt stops.txt stop_times.txt trips.txt
-    path_to_zip = 'static/data/GTFS/gtfs_single.zip'
 
-    if not os.path.exists(path_to_zip):
+    if not os.path.exists(gtfs_single_zip_path):
         return "File not found.", 404
 
-    return send_file(path_to_zip, as_attachment=True, download_name='pmpml_gtfs_single.zip')
+    return send_file(gtfs_single_zip_path, as_attachment=True, download_name='pmpml_gtfs_single.zip')
