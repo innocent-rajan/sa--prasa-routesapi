@@ -13,6 +13,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 import polyline
 
+from utils.main import get_trip_schedules_from_static
+
 static_path_bus = 'static/data/GTFS/'
 
 bus_routes_df = pd.read_csv(static_path_bus + 'routes.txt')
@@ -370,7 +372,7 @@ def generate_polylines():
 
         if route_id not in route_ids:
             # Append route_id and encoded polyline to lists
-            route_ids.append(route_id)
+            route_ids.append(str(route_id))
             polylines.append(encoded_polyline)
 
     # Create DataFrame from lists
@@ -393,6 +395,14 @@ def generate_bus_route_details():
     df.to_csv(static_path_bus+'bus_route_details.csv', index_label='id', columns=headers)
 
 
+def generate_schedule():
+    schedule_dict = dict()
+    for r in bus_routes_df.route_id:
+        schedule_dict[r] = str(get_trip_schedules_from_static(r))
+    df = pd.DataFrame.from_dict(schedule_dict, orient='index')
+    df.to_csv(static_path_bus+'schedule.csv', index_label='route_id')
+
+
 def set_data():
     add_routes_bus()
     add_stops_bus()
@@ -404,5 +414,8 @@ def set_data():
     set_next_stop_bus()
     generate_polylines()
     generate_bus_route_details()
+
+
+generate_schedule()
 
 # set_data()

@@ -80,3 +80,15 @@ def get_gtfs_zip():
         return "File not found.", 404
 
     return send_file(path_to_zip, as_attachment=True, download_name='pmpml_gtfs.zip')
+
+
+@pmpml_bp.route('/gtfs_zip/single', endpoint='get_gtfs_single_zip')
+def get_gtfs_single_zip():
+    # To zip use
+    # zip -9 pmpml_gtfs_.zip routes.txt shapes.txt stops.txt stop_times.txt trips.txt
+    path_to_zip = 'static/data/GTFS/gtfs_single.zip'
+
+    if not os.path.exists(path_to_zip):
+        return "File not found.", 404
+
+    return send_file(path_to_zip, as_attachment=True, download_name='pmpml_gtfs_single.zip')
