@@ -162,7 +162,7 @@ def get_transit_route_details_func(route):
                     'stops_distance': ast.literal_eval(
                         BusRouteStopDistance.query.filter_by(route_id=route.route_id).one().
                         stops_distances),
-                    'trips_schedule': get_trip_schedules_from_static(route.route_id)
+                    'trips_schedule': get_trip_schedules_from_dict(route.route_id)
                 }
             ]
         }

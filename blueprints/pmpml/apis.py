@@ -19,11 +19,11 @@ pmpml_bp = Blueprint('pmpml', __name__)
 def require_api_key(api_key):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            request_api_key = request.headers.get('x-api-key')
-            if request_api_key in api_key:
+            request_api_key = request.headers.get('x-api-key', None)
+            if request_api_key is not None and request_api_key in api_key:
                 return func(*args, **kwargs)
             else:
-                return jsonify({'message': 'Unauthorized'}), 401
+                return jsonify({'status': 'failed', 'description': 'Unauthorized'}), 401
 
         return wrapper
 
