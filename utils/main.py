@@ -113,6 +113,7 @@ def get_stops_func():
         stops = BusStop.query.all()
         all_stops = {
             'status': 'success',
+            'message': 'success',
             'description': '',
             'stops': [
                 {
@@ -120,8 +121,9 @@ def get_stops_func():
                     'name': stop.stop_name,
                     'lat': float(stop.stop_lat),
                     'lon': float(stop.stop_lon),
+                    'lng': float(stop.stop_lon),
                     'next_stop': bus_next_stop_dict[stop.stop_id],
-                    'type': 'bus',
+                    'stop_type': 'bus',
                     'city': 'pun',
                     'agency': 'pmpml'
                 }
@@ -133,6 +135,7 @@ def get_stops_func():
         print(e)
         all_routes = {
             'status': 'failed',
+            'message': 'failed',
             'description': 'Some error occurred'
         }
         return jsonify(all_routes), 400
