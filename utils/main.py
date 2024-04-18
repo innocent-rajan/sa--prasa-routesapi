@@ -149,6 +149,7 @@ def get_transit_route_details_func(route):
         route = BusRoute.query.filter(BusRoute.route_id == route).one()
         transit_routes = {
             'status': 'success',
+            'msg': 'success',
             'description': '',
             'transit_route': [
                 {
@@ -175,6 +176,7 @@ def get_transit_route_details_func(route):
         print(e)
         transit_routes = {
             'status': 'failed',
+            'msg': 'failed',
             'description': 'some error occurred',
         }
         return jsonify(transit_routes), 400
