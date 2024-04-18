@@ -121,6 +121,7 @@ def get_stops_func():
                     'lat': float(stop.stop_lat),
                     'lon': float(stop.stop_lon),
                     'next_stop': bus_next_stop_dict[stop.stop_id],
+                    'type': 'bus',
                     'city': 'pun',
                     'agency': 'pmpml'
                 }
@@ -242,7 +243,6 @@ def make_combined_response():
     for v in val:
         bus_next_stop_dict[v.cur_stop] = v.next_stop_name
 
-    # Pre-fetch all stops to reduce database hits inside the loop
     all_stops = BusStop.query.all()
     stops_data = [
         {
@@ -250,7 +250,10 @@ def make_combined_response():
             'name': stop.stop_name,
             'lat': float(stop.stop_lat),
             'lon': float(stop.stop_lon),
-            'next_stop': bus_next_stop_dict.get(stop.stop_id, None)
+            'next_stop': bus_next_stop_dict[stop.stop_id],
+            'type': 'bus',
+            'city': 'pun',
+            'agency': 'pmpml'
         }
         for stop in all_stops
     ]
