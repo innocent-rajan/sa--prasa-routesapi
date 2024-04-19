@@ -3,7 +3,7 @@ import os
 from flask import Blueprint, request, jsonify, send_file
 
 from utils.main import get_routes_func, get_stops_func, get_transit_route_details_func, get_routes_on_stop_func, \
-    make_combined_response
+    make_combined_response, get_nearby_stop_bus
 
 from dotenv import load_dotenv
 
@@ -48,6 +48,19 @@ def get_stops_api():
     return get_stops_func()
 
 
+@pmpml_bp.route('/nearby_stops', endpoint='get_nearby_stops')
+@require_api_key(API_KEY)
+def get_nearby_stops():
+    data = None
+    if request.method == 'GET':
+        data = request.values.to_dict()
+    if data is not None:
+        query_coords = [data['user_lat'], data['user_lon']]
+        return get_nearby_stop_bus(query_coords)
+    else:
+        return {'status': 'failed', 'description': 'Wrong route'}, 400
+
+
 @pmpml_bp.route('/transit_route_details', endpoint='get_transit_route_details')
 @require_api_key(API_KEY)
 def get_transit_route_details():
@@ -57,7 +70,7 @@ def get_transit_route_details():
     if data is not None:
         return get_transit_route_details_func(data['route'])
     else:
-        return 'Wrong route', 400
+        return {'status': 'failed', 'description': 'Wrong route'}, 400
 
 
 @pmpml_bp.route('/routes_on_stop', endpoint='get_routes_on_stop')
@@ -69,7 +82,7 @@ def get_routes_on_stop():
     if data is not None:
         return get_routes_on_stop_func(int(data['stop_id']), data['time'] if 'time' in data.keys() else None)
     else:
-        return 'Wrong route', 400
+        return {'status': 'failed', 'description': 'Wrong stop'}, 400
 
 
 @pmpml_bp.route('/gtfs_zip', endpoint='get_gtfs_zip')

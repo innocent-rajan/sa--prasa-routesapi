@@ -1,12 +1,18 @@
 import ast
 import datetime
+import math
+import os
 
+import numpy as np
 import pandas as pd
+from dotenv import load_dotenv
 from flask import jsonify
-from sqlalchemy.orm import joinedload
 
 # from app import create_app
 from db_operations.models_file import BusRoutesDetail, BusRoute, BusStop, BusNextStop, BusAllRoute, BusRouteStopDistance
+
+load_dotenv()
+radius = int(os.getenv('radius'))
 
 column_data_types = {
     'stop_id': str,
@@ -302,7 +308,7 @@ def make_combined_response():
             }
             routes_data.append(route_data)
         except Exception as e:
-            print(f"Failed to process route {route_id}: {e}")
+            print(f"Failed to process route {route.route_id}: {e}")
 
     response = {
         'status': 'success',
@@ -312,6 +318,37 @@ def make_combined_response():
     }
 
     return jsonify(response), 200
+
+
+def get_nearby_stop_bus(query_coords):
+    val = BusNextStop.query.all()
+    for v in val:
+        bus_next_stop_dict[v.cur_stop] = v.next_stop_name
+    try:
+        q_lat = float(query_coords[0])
+        q_lng = float(query_coords[1])
+
+        vehicle_lats = stops_df['stop_lat'].values.astype(float)
+        vehicle_lngs = stops_df['stop_lon'].values.astype(float)
+
+        stst = 6367 * 2 * np.arcsin(np.sqrt(
+            np.sin((np.radians(vehicle_lats) - math.radians(q_lat)) / 2) ** 2 + math.cos(
+                math.radians(q_lat)) * np.cos(np.radians(vehicle_lats)) * np.sin(
+                (np.radians(vehicle_lngs) - math.radians(q_lng)) / 2) ** 2))
+        bus_record_indices_within_radius = np.where(stst <= radius)[0]
+        res = stops_df.iloc[bus_record_indices_within_radius]
+        res['distance'] = stst[bus_record_indices_within_radius]
+        res.sort_values(by='distance', inplace=True)
+        resp = {'stops': [], 'status': 'success', 'message': '', 'count': len(res)}
+        for a in res.iterrows():
+            resp['stops'].append({'id': a[1].stop_id, 'name': a[1].stop_name, 'lat': float(a[1].stop_lat),
+                                  'lng': float(a[1].stop_lon), 'distance': round(a[1].distance*100, 2),
+                                  'stop_type': 'bus', 'next_stop': bus_next_stop_dict[a[1].stop_id]})
+        return jsonify(resp), 200
+    except Exception as e:
+        print(e)
+        resp = {'stops': [], 'status': 'failed', 'message': 'some error occurred', 'count': 0}
+        return jsonify(resp), 400
 
 
 if __name__ == '__main__':
