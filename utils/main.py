@@ -152,7 +152,7 @@ def get_transit_route_details_func(route):
     for v in val:
         bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
     try:
-        route = BusRoute.query.filter(BusRoute.route_id == route).one()
+        route = BusRoute.query.filter(BusRoute.route_long_name == route).one()
         transit_routes = {
             'status': 'success',
             'msg': 'success',
