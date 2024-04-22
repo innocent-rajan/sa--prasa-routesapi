@@ -25,7 +25,7 @@ def create_app():
     app.config.from_pyfile('config.cfg')
     app.config['SECRET_KEY'] = SECRET_KEY
     register_extensions(app)
-    app.register_blueprint(pmpml_bp, url_prefix='/pmpml')
+    app.register_blueprint(pmpml_bp, url_prefix='/')
     return app
 
 
