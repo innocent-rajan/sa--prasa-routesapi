@@ -351,5 +351,22 @@ def get_nearby_stop_bus(query_coords):
         return jsonify(resp), 400
 
 
+def get_fare_estimate(route, start_idx, end_idx):
+    resp = {'data': {}, 'status': '', 'message': '',}
+    try:
+        resp['data'] = {'fare': estimate_fare(route, start_idx, end_idx)}
+        resp['status'] = 'success'
+        resp['message'] = 'Fare estimate successful'
+    except Exception as e:
+        resp['data'] = {'fare': 5}
+        resp['status'] = 'success'
+        resp['message'] = f'Fare estimate failed due to {e}'
+    return resp
+
+
+def estimate_fare(route, start_idx, end_idx):
+    return 5
+
+
 if __name__ == '__main__':
     pass
