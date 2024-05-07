@@ -3,7 +3,7 @@ import os
 from flask import Blueprint, request, jsonify, send_file
 
 from utils.main import get_routes_func, get_stops_func, get_transit_route_details_func, get_routes_on_stop_func, \
-    make_combined_response, get_nearby_stop_bus, get_fare_estimate
+    make_combined_response, get_nearby_stop_bus, get_fare_estimate, get_only_routes_func
 
 from dotenv import load_dotenv
 
@@ -34,6 +34,12 @@ def require_api_key(api_key):
 @require_api_key(API_KEY)
 def get_routes_api():
     return get_routes_func()
+
+
+@pmpml_bp.route('/only-routes', endpoint='get_only_routes_api')
+@require_api_key(API_KEY)
+def get_only_routes_api():
+    return get_only_routes_func()
 
 
 @pmpml_bp.route('/complete_info', endpoint='get_complete_routes_info')

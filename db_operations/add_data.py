@@ -400,6 +400,7 @@ def generate_schedule():
     for r in bus_routes_df.route_id:
         schedule_dict[r] = str(get_trip_schedules_from_static(r))
     df = pd.DataFrame.from_dict(schedule_dict, orient='index')
+    df.columns = ['schedule']
     df.to_csv(static_path_bus+'schedule.csv', index_label='route_id')
 
 

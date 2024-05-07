@@ -111,6 +111,28 @@ def get_routes_func():
         return jsonify(all_routes), 400
 
 
+def get_only_routes_func():
+    try:
+        routes = BusRoute.query.all()
+        all_routes = {'status': 'success', 'description': '', 'routes': []}
+        for route in routes:
+            all_routes['routes'].append({
+                'id': route.route_id,
+                'short_name': 'nan',
+                'long_name': route.route_long_name,
+                'description': route.route_desc,
+                'agency': route.agency_id
+            })
+        return jsonify(all_routes), 200
+    except Exception as e:
+        print(e)
+        all_routes = {
+            'status': 'failed',
+            'description': 'Some error occurred'
+        }
+        return jsonify(all_routes), 400
+
+
 def get_stops_func():
     val = BusNextStop.query.all()
     for v in val:
