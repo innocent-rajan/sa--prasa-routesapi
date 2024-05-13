@@ -10,6 +10,7 @@ from flask import jsonify
 
 # from app import create_app
 from db_operations.models_file import BusRoutesDetail, BusRoute, BusStop, BusNextStop, BusAllRoute, BusRouteStopDistance
+from utils.fare_operations import get_fare
 
 load_dotenv()
 radius = int(os.getenv('radius'))
@@ -374,20 +375,26 @@ def get_nearby_stop_bus(query_coords):
 
 
 def get_fare_estimate(route, start_idx, end_idx):
-    resp = {'data': {}, 'status': '', 'message': '',}
+    resp = {'data': {}, 'status': '', 'message': ''}
     try:
-        resp['data'] = {'fare': estimate_fare(route, start_idx, end_idx)}
-        resp['status'] = 'success'
-        resp['message'] = 'Fare estimate successful'
+        fare = get_fare(route, start_idx, end_idx)
+        if fare is not None:
+            resp['data'] = {'fare': fare}
+            resp['status'] = 'success'
+            resp['message'] = 'Fare estimate successful'
+        else:
+            resp['data'] = {'fare': None}
+            resp['status'] = 'failed'
+            resp['message'] = f'Fare estimate failed.'
     except Exception as e:
-        resp['data'] = {'fare': 5}
-        resp['status'] = 'success'
+        resp['data'] = {'fare': None}
+        resp['status'] = 'failed'
         resp['message'] = f'Fare estimate failed due to {e}'
-    return resp
+    return resp, 200
 
 
-def estimate_fare(route, start_idx, end_idx):
-    return 5
+# def estimate_fare(route, start_idx, end_idx):
+#     return 5
 
 
 if __name__ == '__main__':
