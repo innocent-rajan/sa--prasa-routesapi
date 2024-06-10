@@ -215,10 +215,10 @@ def get_routes_on_stop_func(stop_id, time=None):
     val = BusRoutesDetail.query.all()
     for v in val:
         bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
-    if time is None:
-        query_time = datetime.datetime.now().time()
-    else:
-        query_time = datetime.datetime.strptime(time, "%H:%M:%S").time()
+    # if time is None:
+    #     query_time = datetime.datetime.now().time()
+    # else:
+    #     query_time = datetime.datetime.strptime(time, "%H:%M:%S").time()
     stop = BusStop.query.filter(BusStop.stop_id == stop_id).one()
     val = BusNextStop.query.all()
     for v in val:
@@ -230,11 +230,14 @@ def get_routes_on_stop_func(stop_id, time=None):
                       'updated_at': datetime.datetime.now().time().strftime("%H:%M:%S")}
     upcoming_routes = []
     for route in routes:
+        print(route)
         rt = BusRoute.query.filter(BusRoute.route_id == route).one()
         trip_schedule = get_trip_schedules_from_static(rt.route_id, int(stop_id))
         trip_times = [datetime.datetime.strptime(time_str, "%H:%M").time() for time_str in trip_schedule]
-        upcoming_times = sorted([time for time in trip_times if time > query_time])
-        next_two_times = [time.strftime("%H:%M") for time in upcoming_times[:2]]
+        # upcoming_times = sorted([time for time in trip_times if time > query_time])
+        upcoming_times = sorted([time for time in trip_times])
+        # next_two_times = [time.strftime("%H:%M") for time in upcoming_times[:2]]
+        next_two_times = [time.strftime("%H:%M") for time in upcoming_times]
         if len(next_two_times) == 0:
             next_two_times.append("NA")
         upcoming_routes.append({'route': rt.route_long_name, 'upcoming_trips_schedule': next_two_times,
@@ -266,6 +269,10 @@ def get_trip_schedules_from_dict(route_id):
 
 
 def convert_to_h_m(time):
+    time_split = time.split(":")
+    if int(time_split[0]) > 23:
+        time_split[0] = int(time_split[0]) - 24
+        time = f'{time_split[0]}:{time_split[1]}:{time_split[2]}'
     time_obj = datetime.datetime.strptime(time, "%H:%M:%S")
     return time_obj.strftime("%H:%M")
 
