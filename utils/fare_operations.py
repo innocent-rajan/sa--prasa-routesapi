@@ -30,4 +30,7 @@ def get_fare_options_from_source(route, start_idx, type="general", is_ac=False):
     query = f'SELECT json_extract(fare, \'$.\"{start_idx}\"\') from fares where route = \"{route}\";'
     cur.execute(query)
     fare = cur.fetchall()[0][0]
-    return json.loads(fare)
+    try:
+        return json.loads(fare)
+    except:
+        return None
