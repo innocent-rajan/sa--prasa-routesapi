@@ -2,6 +2,7 @@ import ast
 import datetime
 import math
 import os
+from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -10,7 +11,7 @@ from flask import jsonify
 
 # from app import create_app
 from db_operations.models_file import BusRoutesDetail, BusRoute, BusStop, BusNextStop, BusAllRoute, BusRouteStopDistance
-from utils.fare_operations import get_fare
+from utils.fare_operations import get_fare_by_idx, get_stop_by_amount, get_fare_options_from_source
 
 load_dotenv()
 radius = int(os.getenv('radius'))
@@ -381,10 +382,13 @@ def get_nearby_stop_bus(query_coords):
         return jsonify(resp), 400
 
 
-def get_fare_estimate(route, start_idx, end_idx):
+def get_fare_estimate(route, start_idx, end_idx, fare=None):
     resp = {'data': {}, 'status': '', 'message': ''}
     try:
-        fare = get_fare(route, start_idx, end_idx)
+        if fare is not None:
+            fare = get_stop_by_amount(route, start_idx, fare)
+        else:
+            fare = get_fare_by_idx(route, start_idx, end_idx)
         if fare is not None:
             resp['data'] = {'fare': fare}
             resp['status'] = 'success'
@@ -400,8 +404,59 @@ def get_fare_estimate(route, start_idx, end_idx):
     return resp, 200
 
 
-# def estimate_fare(route, start_idx, end_idx):
-#     return 5
+def get_fare_options(route, start_idx):
+    resp = {'data': {}, 'status': '', 'message': ''}
+    fare = get_fare_options_from_source(route, start_idx)
+    if fare is not None:
+        try:
+            resp['data'] = generate_fare_options_response(fare)
+            resp['status'] = 'success'
+            resp['message'] = 'Fare options fetched successful'
+            return resp, 200
+        except Exception:
+            resp['data'] = {'fare': None}
+            resp['status'] = 'failed'
+            resp['message'] = f'Fare estimate failed.'
+    else:
+        resp['data'] = {'fare': None}
+        resp['status'] = 'failed'
+        resp['message'] = f'Fare estimate failed.'
+    return resp, 400
+
+
+
+def generate_fare_options_response(fare_dict):
+    fare_list = []
+    current_fare = None
+    start_stop_index = None
+    for idx, fare in fare_dict.items():
+        if fare != current_fare:
+            if current_fare is not None:
+                # Append the previous fare segment
+                fare_list.append({
+                    "start_stop_index": start_stop_index,
+                    "end_stop_index": int(idx) - 1,
+                    "basic_fare": float(current_fare),
+                    "toll": 0.0,
+                    "total_fare": float(current_fare),
+                    "amount_payable_by_user": float(current_fare),
+                    "discount_percentage": 0
+                })
+            # Update variables for the new fare segment
+            current_fare = fare
+            start_stop_index = int(idx)
+
+    fare_list.append({
+        "start_stop_index": start_stop_index,
+        "end_stop_index": int(idx),
+        "basic_fare": float(current_fare),
+        "toll": 0.0,
+        "total_fare": float(current_fare),
+        "amount_payable_by_user": float(current_fare),
+        "discount_percentage": 0
+    })
+
+    return fare_list
 
 
 if __name__ == '__main__':

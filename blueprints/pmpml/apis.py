@@ -3,7 +3,7 @@ import os
 from flask import Blueprint, request, jsonify, send_file
 
 from utils.main import get_routes_func, get_stops_func, get_transit_route_details_func, get_routes_on_stop_func, \
-    make_combined_response, get_nearby_stop_bus, get_fare_estimate, get_only_routes_func
+    make_combined_response, get_nearby_stop_bus, get_fare_estimate, get_only_routes_func, get_fare_options
 
 from dotenv import load_dotenv
 
@@ -98,7 +98,19 @@ def fare_estimate():
     if request.method == 'GET':
         data = request.values.to_dict()
     if data is not None:
-        return get_fare_estimate(data['route_id'], data['start_idx'], data['end_idx'])
+        return get_fare_estimate(data['route_id'], data['start_idx'], data.get('end_idx'), data.get('fare'))
+    else:
+        return {'status': 'failed', 'description': 'Wrong input'}, 400
+
+
+@pmpml_bp.route('/fare_options', endpoint='fare_options')
+@require_api_key(API_KEY)
+def fare_estimate():
+    data = None
+    if request.method == 'GET':
+        data = request.values.to_dict()
+    if data is not None:
+        return get_fare_options(data['route_id'], data['start_idx'])
     else:
         return {'status': 'failed', 'description': 'Wrong input'}, 400
 
