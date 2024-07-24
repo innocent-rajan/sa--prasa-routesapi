@@ -98,7 +98,7 @@ def fare_estimate():
     if request.method == 'GET':
         data = request.values.to_dict()
     if data is not None:
-        return get_fare_estimate(data['route_id'], data['start_idx'], data.get('end_idx'), data.get('fare'))
+        return get_fare_estimate(data['route_id'].lower(), data['start_idx'], data.get('end_idx'), data.get('fare'))
     else:
         return {'status': 'failed', 'description': 'Wrong input'}, 400
 
