@@ -11,7 +11,7 @@ from flask import jsonify
 
 # from app import create_app
 from db_operations.models_file import BusRoutesDetail, BusRoute, BusStop, BusNextStop, BusAllRoute, BusRouteStopDistance
-from utils.fare_operations import get_fare_by_idx, get_stop_by_amount, get_fare_options_from_source
+from utils.fare_operations import get_fare_by_idx, get_stop_by_amount, get_fare_options_from_source, get_fare_by_idx_v2
 
 load_dotenv()
 radius = int(os.getenv('radius'))
@@ -30,8 +30,11 @@ routes_df = pd.read_csv(gtfs_folder + 'routes.txt')
 stops_df = pd.read_csv(gtfs_folder + 'stops.txt', dtype=column_data_types)
 trips_df = pd.read_csv(gtfs_folder + 'trips.txt')
 stop_times_df = pd.read_csv(gtfs_folder + 'stop_times.txt')
-polylines_df = pd.read_csv(gtfs_folder + 'polylines.csv', dtype={'route_id': 'str'})
-polylines_df.set_index('route_id', inplace=True)
+try:
+    polylines_df = pd.read_csv(gtfs_folder + 'polylines.csv', dtype={'route_id': 'str'})
+    polylines_df.set_index('route_id', inplace=True)
+except FileNotFoundError:
+    polylines_df = pd.DataFrame()
 
 bus_stops_dict = dict(zip(stops_df.stop_id, stops_df.stop_name))
 bus_route_details_dict = dict()
@@ -373,7 +376,7 @@ def get_nearby_stop_bus(query_coords):
         resp = {'stops': [], 'status': 'success', 'message': '', 'count': len(res)}
         for a in res.iterrows():
             resp['stops'].append({'id': a[1].stop_id, 'name': a[1].stop_name, 'lat': float(a[1].stop_lat),
-                                  'lng': float(a[1].stop_lon), 'distance': round(a[1].distance*100, 2),
+                                  'lng': float(a[1].stop_lon), 'distance': round(a[1].distance * 100, 2),
                                   'stop_type': 'bus', 'next_stop': bus_next_stop_dict[a[1].stop_id]})
         return jsonify(resp), 200
     except Exception as e:
@@ -404,6 +407,26 @@ def get_fare_estimate(route, start_idx, end_idx, fare=None):
     return resp, 200
 
 
+def get_fare_estimate_v2(route, start_idx, end_idx, fare=None):
+    resp = {'data': {}, 'status': '', 'message': ''}
+    try:
+        fare = get_fare_by_idx_v2(route, start_idx, end_idx)
+        if fare is not None:
+            resp['data'] = {'fare': fare}
+            resp['status'] = 'success'
+            resp['message'] = 'Fare estimate successful'
+        else:
+            resp['data'] = {'fare': None}
+            resp['status'] = 'failed'
+            resp['message'] = f'Fare estimate failed.'
+    except Exception as e:
+        resp['data'] = {'fare': None}
+        resp['status'] = 'failed'
+        resp['message'] = f'Fare estimate failed due to {e}'
+    return resp, 200
+
+
+
 def get_fare_options(route, start_idx):
     resp = {'data': {}, 'status': '', 'message': ''}
     fare = get_fare_options_from_source(route, start_idx)
@@ -424,7 +447,6 @@ def get_fare_options(route, start_idx):
     return resp, 400
 
 
-
 def generate_fare_options_response(fare_dict):
     fare_list = []
     current_fare = None
@@ -436,10 +458,10 @@ def generate_fare_options_response(fare_dict):
                 fare_list.append({
                     "start_stop_index": start_stop_index,
                     "end_stop_index": int(idx) - 1,
-                    "basic_fare": float(current_fare),
-                    "toll": 0.0,
-                    "total_fare": float(current_fare),
-                    "amount_payable_by_user": float(current_fare),
+                    "basic_fare": float(current_fare['basic']),
+                    "toll": current_fare['toll'],
+                    "total_fare": float(current_fare['total']),
+                    "amount_payable_by_user": float(current_fare['total']),
                     "discount_percentage": 0
                 })
             # Update variables for the new fare segment
@@ -449,10 +471,10 @@ def generate_fare_options_response(fare_dict):
     fare_list.append({
         "start_stop_index": start_stop_index,
         "end_stop_index": int(idx),
-        "basic_fare": float(current_fare),
-        "toll": 0.0,
-        "total_fare": float(current_fare),
-        "amount_payable_by_user": float(current_fare),
+        "basic_fare": float(current_fare['basic']),
+        "toll": current_fare['toll'],
+        "total_fare": float(current_fare['total']),
+        "amount_payable_by_user": float(current_fare['total']),
         "discount_percentage": 0
     })
 
