@@ -1,5 +1,6 @@
 import sqlite3
 import json
+import ast
 
 conn = sqlite3.connect('file:instance/fare_matrix_8_8_child.db?mode=ro', check_same_thread=False)
 _conn = sqlite3.connect('file:instance/fare_matrix_9_8.db?mode=ro', check_same_thread=False)
@@ -55,4 +56,16 @@ def get_fare_options_from_source(route, start_idx, type="general", is_ac=False):
         # return json.loads(fare)
     except:
         print(query)
+        return None
+
+
+def get_fare_options_from_source_v2(route, start_idx, type="general", is_ac=False):
+    cur = conn.cursor()
+    query = f'SELECT json_extract(fare, \'$.\"{start_idx}\"\'), category from fares where route = \"{route.lower()}\";'
+    cur.execute(query)
+    try:
+        fare = cur.fetchall()
+        return {data[1]: {k: {'basic': v['b'], 'toll': v['t'], 'total': v['s']} for k, v in json.loads(data[0]).items()} for data in fare}
+    except Exception as e:
+        print(e)
         return None
