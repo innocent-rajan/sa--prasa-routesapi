@@ -2,8 +2,9 @@ import sqlite3
 import json
 import ast
 
-conn = sqlite3.connect('file:instance/fare_matrix_8_8_child.db?mode=ro', check_same_thread=False)
-_conn = sqlite3.connect('file:instance/fare_matrix_9_8.db?mode=ro', check_same_thread=False)
+# conn = sqlite3.connect('file:instance/fare_matrix_8_8_child.db?mode=ro', check_same_thread=False)
+conn = sqlite3.connect('file:', check_same_thread=False)
+_conn = sqlite3.connect('file:', check_same_thread=False)
 
 
 def get_fare_by_idx(route, start_idx, end_idx, type="general", is_ac=False):
