@@ -83,42 +83,42 @@ def get_polyline(route_id):
 
 
 def get_routes_func():
-    with open(f'static/data/routes.json', 'r') as file:
-        data = json.load(file)
-
-    return jsonify(data)
-
-    # val = BusRoutesDetail.query.all()
-    # for v in val:
-    #     bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
-    # try:
-    #     routes = BusRoute.query.all()
-    #     all_routes = {'status': 'success', 'description': '', 'routes': []}
-    #     for route in routes:
-    #         trips = get_trip_schedules_from_dict(route.route_id)
-    #         all_routes['routes'].append({
-    #             'id': route.route_id,
-    #             'short_name': 'nan',
-    #             'long_name': route.route_long_name,
-    #             'description': route.route_desc,
-    #             'route': get_direction(route.route_long_name)[0],
-    #             'direction': get_direction(route.route_long_name)[1],
-    #             'start': bus_stops_dict[bus_route_details_dict[route.route_id][0]],
-    #             'end': bus_stops_dict[bus_route_details_dict[route.route_id][1]],
-    #             'polyline': get_polyline(route.route_id),
-    #             'trips_schedule': trips,
-    #             'trips_count': len(trips),
-    #             'city': 'pun',
-    #             'agency': route.agency_id
-    #         })
-    #     return jsonify(all_routes), 200
-    # except Exception as e:
-    #     print(e)
-    #     all_routes = {
-    #         'status': 'failed',
-    #         'description': 'Some error occurred'
-    #     }
-    #     return jsonify(all_routes), 400
+    try:
+        with open(f'static/data/routes.json', 'r') as file:
+            data = json.load(file)
+        return jsonify(data)
+    except FileNotFoundError:
+        val = BusRoutesDetail.query.all()
+        for v in val:
+            bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
+        try:
+            routes = BusRoute.query.all()
+            all_routes = {'status': 'success', 'description': '', 'routes': []}
+            for route in routes:
+                trips = get_trip_schedules_from_dict(route.route_id)
+                all_routes['routes'].append({
+                    'id': route.route_id,
+                    'short_name': 'nan',
+                    'long_name': route.route_long_name,
+                    'description': route.route_desc,
+                    'route': get_direction(route.route_long_name)[0],
+                    'direction': get_direction(route.route_long_name)[1],
+                    'start': bus_stops_dict[bus_route_details_dict[route.route_id][0]],
+                    'end': bus_stops_dict[bus_route_details_dict[route.route_id][1]],
+                    'polyline': get_polyline(route.route_id),
+                    'trips_schedule': trips,
+                    'trips_count': len(trips),
+                    'city': 'raj',
+                    'agency': route.agency_id
+                })
+            return jsonify(all_routes), 200
+        except Exception as e:
+            print(e)
+            all_routes = {
+                'status': 'failed',
+                'description': 'Some error occurred'
+            }
+            return jsonify(all_routes), 400
 
 
 def get_only_routes_func():
@@ -144,43 +144,45 @@ def get_only_routes_func():
 
 
 def get_stops_func():
-    with open(f'static/data/stops.json', 'r') as file:
-        data = json.load(file)
+    try:
+        with open(f'static/data/stops.json', 'r') as file:
+            data = json.load(file)
 
-    return jsonify(data)
-    # val = BusNextStop.query.all()
-    # for v in val:
-    #     bus_next_stop_dict[v.cur_stop] = v.next_stop_name
-    # try:
-    #     stops = BusStop.query.all()
-    #     all_stops = {
-    #         'status': 'success',
-    #         'message': 'success',
-    #         'description': '',
-    #         'stops': [
-    #             {
-    #                 'id': stop.stop_id,
-    #                 'name': stop.stop_name,
-    #                 'lat': float(stop.stop_lat),
-    #                 'lon': float(stop.stop_lon),
-    #                 'lng': float(stop.stop_lon),
-    #                 'next_stop': bus_next_stop_dict[stop.stop_id],
-    #                 'stop_type': 'bus',
-    #                 'city': 'pun',
-    #                 'agency': 'pmpml'
-    #             }
-    #             for stop in stops
-    #         ]
-    #     }
-    #     return jsonify(all_stops), 200
-    # except Exception as e:
-    #     print(e)
-    #     all_routes = {
-    #         'status': 'failed',
-    #         'message': 'failed',
-    #         'description': 'Some error occurred'
-    #     }
-    #     return jsonify(all_routes), 400
+        return jsonify(data)
+    except FileNotFoundError:
+        val = BusNextStop.query.all()
+        for v in val:
+            bus_next_stop_dict[v.cur_stop] = v.next_stop_name
+        try:
+            stops = BusStop.query.all()
+            all_stops = {
+                'status': 'success',
+                'message': 'success',
+                'description': '',
+                'stops': [
+                    {
+                        'id': stop.stop_id,
+                        'name': stop.stop_name,
+                        'lat': float(stop.stop_lat),
+                        'lon': float(stop.stop_lon),
+                        'lng': float(stop.stop_lon),
+                        'next_stop': bus_next_stop_dict[stop.stop_id],
+                        'stop_type': 'bus',
+                        'city': 'raj',
+                        'agency': 'rrl'
+                    }
+                    for stop in stops
+                ]
+            }
+            return jsonify(all_stops), 200
+        except Exception as e:
+            print(e)
+            all_routes = {
+                'status': 'failed',
+                'message': 'failed',
+                'description': 'Some error occurred'
+            }
+            return jsonify(all_routes), 400
 
 
 def get_transit_route_details_func(route):
