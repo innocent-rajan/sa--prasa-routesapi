@@ -10,6 +10,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from flask import jsonify
 from sqlalchemy import and_
+from sqlalchemy.orm import aliased
 
 # from app import create_app
 from db_operations.models_file import BusRoutesDetail, BusRoute, BusStop, BusNextStop, BusAllRoute, \
@@ -558,9 +559,10 @@ def get_schedule_on_stop_func(route, stop_id, _time=None):
         _time = datetime.datetime.now().time()
     response = {}
     try:
+        BusStopTimeAlias = aliased(BusStopTime)
         route_id = BusRoute.query.filter(BusRoute.route_long_name == route).one().route_id
         trips = [x.trip_id for x in BusTrip.query.filter(BusTrip.route_id == route_id).all()]
-        schedule = [x.arrival_time for x in BusStopTime.query.filter(and_(BusStopTime.trip_id.in_(trips),
+        schedule = [x.arrival_time[:-3] for x in BusStopTime.query.filter(and_(BusStopTime.trip_id.in_(trips),
                                                                           (BusStopTime.stop_id == stop_id),
                                                                           (BusStopTime.arrival_time > _time))).all()]
         if len(schedule) > 0:
