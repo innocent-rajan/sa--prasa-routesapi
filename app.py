@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_compress import Compress
 
-from blueprints.pmpml.apis import pmpml_bp
-from blueprints.pmpml.v2.apis import pmpml_v2_bp
+from blueprints.rrl.apis import rrl_bp
+from blueprints.rrl.v2.apis import rrl_v2_bp
 from exts import db
 
 # from werkzeug.middleware.profiler import ProfilerMiddleware
@@ -26,8 +26,8 @@ def create_app():
     app.config.from_pyfile('config.cfg')
     app.config['SECRET_KEY'] = SECRET_KEY
     register_extensions(app)
-    app.register_blueprint(pmpml_bp, url_prefix='/')
-    app.register_blueprint(pmpml_v2_bp, url_prefix='/v2')
+    app.register_blueprint(rrl_bp, url_prefix='/')
+    app.register_blueprint(rrl_v2_bp, url_prefix='/v2')
     return app
 
 

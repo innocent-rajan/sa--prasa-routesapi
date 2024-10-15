@@ -1,6 +1,7 @@
 import ast
 import datetime
 import json
+import logging
 import math
 import os
 
@@ -8,9 +9,11 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from flask import jsonify
+from sqlalchemy import and_
 
 # from app import create_app
-from db_operations.models_file import BusRoutesDetail, BusRoute, BusStop, BusNextStop, BusAllRoute, BusRouteStopDistance
+from db_operations.models_file import BusRoutesDetail, BusRoute, BusStop, BusNextStop, BusAllRoute, \
+    BusRouteStopDistance, BusTrip, BusStopTime
 from utils.fare_operations import get_fare_by_idx, get_stop_by_amount, get_fare_by_idx_v2, \
     get_fare_options_from_source_v2
 
@@ -108,7 +111,7 @@ def get_routes_func():
                     'polyline': get_polyline(route.route_id),
                     'trips_schedule': trips,
                     'trips_count': len(trips),
-                    'city': 'raj',
+                    'city': 'rkt',
                     'agency': route.agency_id
                 })
             return jsonify(all_routes), 200
@@ -168,7 +171,7 @@ def get_stops_func():
                         'lng': float(stop.stop_lon),
                         'next_stop': bus_next_stop_dict[stop.stop_id],
                         'stop_type': 'bus',
-                        'city': 'raj',
+                        'city': 'rkt',
                         'agency': 'rrl'
                     }
                     for stop in stops
@@ -309,7 +312,7 @@ def make_combined_response():
             'next_stop': bus_next_stop_dict[stop.stop_id],
             'type': 'bus',
             'city': 'pun',
-            'agency': 'pmpml'
+            'agency': 'rrl'
         }
         for stop in all_stops
     ]
@@ -548,6 +551,33 @@ def generate_fare_options_response_v2(fare_dict):
         category_fare_list[category] = fare_list
 
     return category_fare_list
+
+
+def get_schedule_on_stop_func(route, stop_id, _time=None):
+    if _time is None or _time == '':
+        _time = datetime.datetime.now().time()
+    response = {}
+    try:
+        route_id = BusRoute.query.filter(BusRoute.route_long_name == route).one().route_id
+        trips = [x.trip_id for x in BusTrip.query.filter(BusTrip.route_id == route_id).all()]
+        schedule = [x.arrival_time for x in BusStopTime.query.filter(and_(BusStopTime.trip_id.in_(trips),
+                                                                          (BusStopTime.stop_id == stop_id),
+                                                                          (BusStopTime.arrival_time > _time))).all()]
+        if len(schedule) > 0:
+            response['data'] = schedule
+            response['status'] = 'success'
+            response['description'] = ''
+            return jsonify(response), 200
+        else:
+            response['status'] = 'success'
+            response['description'] = 'No upcoming schedule available'
+            response['data'] = []
+        return jsonify(response), 200
+    except Exception as e:
+        logging.log(level=40, msg=f'get_schedule_on_stop_func {e}')
+        response['status'] = 'failed'
+        response['description'] = 'No upcoming schedule available'
+        return jsonify(response), 400
 
 
 if __name__ == '__main__':

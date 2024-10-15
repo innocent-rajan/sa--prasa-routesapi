@@ -2,8 +2,8 @@ import sqlite3
 import json
 import ast
 
-# conn = sqlite3.connect('file:instance/fare_matrix_8_8_child.db?mode=ro', check_same_thread=False)
-conn = sqlite3.connect('file:', check_same_thread=False)
+conn = sqlite3.connect('file:instance/fare_matrix_17_9.db?mode=ro', check_same_thread=False)
+# conn = sqlite3.connect('file:', check_same_thread=False)
 _conn = sqlite3.connect('file:', check_same_thread=False)
 
 
@@ -17,15 +17,15 @@ def get_fare_by_idx(route, start_idx, end_idx, type="general", is_ac=False):
 
 def get_fare_by_idx_v2(route, start_idx, end_idx, type="general", is_ac=False):
     cur = conn.cursor()
-    query = f'SELECT json_extract(fare, \'$.\"{start_idx}\".\"{end_idx}\"\'), category from fares where route = \"{route.lower()}\";'
+    query = f'SELECT json_extract(fare, \'$.\"{start_idx}\".\"{end_idx}\"\'), is_ac from fares where route = \"{route.lower()}\";'
     cur.execute(query)
     fare = cur.fetchall()
     try:
         return {
-            data[1]: {
-                'basic': json.loads(data[0])['b'],
-                'toll': json.loads(data[0])['t'],
-                'total': json.loads(data[0])['s']
+            'nac' if data[1] == 0 else 'ac': {
+                'basic': data[0],
+                'toll': 0,
+                'total': data[0]
             }
             for data in fare
         }
@@ -62,11 +62,11 @@ def get_fare_options_from_source(route, start_idx, type="general", is_ac=False):
 
 def get_fare_options_from_source_v2(route, start_idx, type="general", is_ac=False):
     cur = conn.cursor()
-    query = f'SELECT json_extract(fare, \'$.\"{start_idx}\"\'), category from fares where route = \"{route.lower()}\";'
+    query = f'SELECT json_extract(fare, \'$.\"{start_idx}\"\'), is_ac from fares where route = \"{route.lower()}\";'
     cur.execute(query)
     try:
         fare = cur.fetchall()
-        return {data[1]: {k: {'basic': v['b'], 'toll': v['t'], 'total': v['s']} for k, v in json.loads(data[0]).items()} for data in fare}
+        return {'nac' if data[1] == 0 else 'ac': {k: {'basic': v, 'toll': 0, 'total': v} for k, v in json.loads(data[0]).items()} for data in fare}
     except Exception as e:
         print(e)
         return None
