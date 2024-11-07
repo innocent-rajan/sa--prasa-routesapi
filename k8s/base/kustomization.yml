@@ -1,0 +1,8 @@
+commonLabels:
+  project: chartr
+resources:
+  - redis/deployment.yml
+  - redis/service.yml
+  - deployment-api-service.yml
+  - service.yml
+  - ingress.yml

@@ -1,0 +1,12 @@
+namespace: dev-rrl-routesapi
+commonLabels:
+  env: dev
+
+resources:
+  - namespace.yml
+  - ../base
+
+configMapGenerator:
+- name: env-secrets
+  envs:
+    - ./.env

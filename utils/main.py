@@ -1,7 +1,5 @@
 import ast
 import datetime
-import json
-import logging
 import math
 import os
 
@@ -9,14 +7,12 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from flask import jsonify
-from sqlalchemy import and_
-from sqlalchemy.orm import aliased
+from sqlalchemy import distinct, and_
 
-# from app import create_app
 from db_operations.models_file import BusRoutesDetail, BusRoute, BusStop, BusNextStop, BusAllRoute, \
     BusRouteStopDistance, BusTrip, BusStopTime
-from utils.fare_operations import get_fare_by_idx, get_stop_by_amount, get_fare_by_idx_v2, \
-    get_fare_options_from_source_v2
+from exts import cache
+from utils.fare_operations import get_fare_by_idx_v2, get_fare_options_from_source_v2
 
 load_dotenv()
 radius = int(os.getenv('radius'))
@@ -31,31 +27,20 @@ column_data_types = {
 }
 
 gtfs_folder = 'static/data/GTFS/'
-routes_df = pd.read_csv(gtfs_folder + 'routes.txt')
 stops_df = pd.read_csv(gtfs_folder + 'stops.txt', dtype=column_data_types)
-trips_df = pd.read_csv(gtfs_folder + 'trips.txt')
-stop_times_df = pd.read_csv(gtfs_folder + 'stop_times.txt')
-try:
-    polylines_df = pd.read_csv(gtfs_folder + 'polylines.csv', dtype={'route_id': 'str'})
-    polylines_df.set_index('route_id', inplace=True)
-except FileNotFoundError:
-    polylines_df = pd.DataFrame()
 
 bus_stops_dict = dict(zip(stops_df.stop_id, stops_df.stop_name))
 bus_route_details_dict = dict()
 bus_next_stop_dict = dict()
-schedule_df = pd.read_csv(gtfs_folder + 'schedule.csv', dtype={'route_id': 'str'})
-schedule_df.set_index('route_id', inplace=True)
 
-# app = create_app()
 
-# def get_route_details():
-# with app.app_context():
-# val = BusRoutesDetail.query.all()
-# for v in val:
-#     bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
-
-# get_route_details()
+def set_dict():
+    global bus_route_details_dict
+    if len(bus_route_details_dict) == 0:
+        val = BusRoutesDetail.query.all()
+        for v in val:
+            bus_route_details_dict[v.route_id] = {'start_stop': v.start_stop, 'end_stop': v.end_stop,
+                                                  'polyline': v.polyline, 'schedule': v.schedule}
 
 
 def get_direction(route_long_name):
@@ -77,29 +62,26 @@ def get_direction(route_long_name):
     return route, direction
 
 
-def get_polyline(route_id):
-    filtered_df = polylines_df.at[route_id, 'polyline']
-    # filtered_df = polylines_df[polylines_df.route_id == route_id].polyline
-    if filtered_df == '':
-        return ''
-    else:
-        return filtered_df
+# def get_polyline(route_id):
+#     filtered_df = polylines_df.at[route_id, 'polyline']
+#     if filtered_df == '':
+#         return ''
+#     else:
+#         return filtered_df
 
 
 def get_routes_func():
-    try:
-        with open(f'static/data/routes.json', 'r') as file:
-            data = json.load(file)
-        return jsonify(data)
-    except FileNotFoundError:
-        val = BusRoutesDetail.query.all()
-        for v in val:
-            bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
+    routes_cache = cache.get('routes')
+    if routes_cache is not None:
+        return jsonify(routes_cache), 200
+    else:
+        set_dict()
         try:
             routes = BusRoute.query.all()
             all_routes = {'status': 'success', 'description': '', 'routes': []}
             for route in routes:
-                trips = get_trip_schedules_from_dict(route.route_id)
+                # trips = get_trip_schedules_from_dict(route.route_id)
+                trips = ast.literal_eval(bus_route_details_dict[route.route_id]['schedule'])
                 all_routes['routes'].append({
                     'id': route.route_id,
                     'short_name': 'nan',
@@ -107,14 +89,15 @@ def get_routes_func():
                     'description': route.route_desc,
                     'route': get_direction(route.route_long_name)[0],
                     'direction': get_direction(route.route_long_name)[1],
-                    'start': bus_stops_dict[bus_route_details_dict[route.route_id][0]],
-                    'end': bus_stops_dict[bus_route_details_dict[route.route_id][1]],
-                    'polyline': get_polyline(route.route_id),
+                    'start': bus_stops_dict[bus_route_details_dict[route.route_id]['start_stop']],
+                    'end': bus_stops_dict[bus_route_details_dict[route.route_id]['end_stop']],
+                    'polyline': bus_route_details_dict[route.route_id]['polyline'],
                     'trips_schedule': trips,
                     'trips_count': len(trips),
-                    'city': 'rkt',
+                    'city': 'pun',
                     'agency': route.agency_id
                 })
+            cache.set('routes', all_routes)
             return jsonify(all_routes), 200
         except Exception as e:
             print(e)
@@ -148,12 +131,10 @@ def get_only_routes_func():
 
 
 def get_stops_func():
-    try:
-        with open(f'static/data/stops.json', 'r') as file:
-            data = json.load(file)
-
-        return jsonify(data)
-    except FileNotFoundError:
+    stops_cache = cache.get('stops')
+    if stops_cache is not None:
+        return jsonify(stops_cache)
+    else:
         val = BusNextStop.query.all()
         for v in val:
             bus_next_stop_dict[v.cur_stop] = v.next_stop_name
@@ -178,6 +159,7 @@ def get_stops_func():
                     for stop in stops
                 ]
             }
+            cache.set('stops', all_stops)
             return jsonify(all_stops), 200
         except Exception as e:
             print(e)
@@ -190,9 +172,10 @@ def get_stops_func():
 
 
 def get_transit_route_details_func(route):
-    val = BusRoutesDetail.query.all()
-    for v in val:
-        bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
+    data = cache.get(f'route_details_{route}')
+    if data is not None:
+        return jsonify(data), 200
+    set_dict()
     try:
         route = BusRoute.query.filter(BusRoute.route_long_name == route).one()
         transit_routes = {
@@ -205,20 +188,21 @@ def get_transit_route_details_func(route):
                     'type': 'bus',
                     'route': route.route_long_name,
                     'short_name': 'nan',
-                    'long_name': f'{route.route_long_name} towards {bus_stops_dict[bus_route_details_dict[route.route_id][1]]}',
+                    'long_name': f'{route.route_long_name} towards {bus_stops_dict[bus_route_details_dict[route.route_id]["end_stop"]]}',
                     'direction': get_direction(route.route_long_name)[1],
                     'interchanges': 'nan',
-                    'polyline': get_polyline(route.route_id),
+                    'polyline': bus_route_details_dict[route.route_id]["polyline"],
                     'stops': [{'stop_id': x[0], 'name': x[1], 'lat': float(x[2]), 'lon': float(x[3])} for x in
                               ast.literal_eval(
                                   BusAllRoute.query.filter_by(route_id=route.route_id).one().stops_details)],
                     'stops_distance': ast.literal_eval(
                         BusRouteStopDistance.query.filter_by(route_id=route.route_id).one().
                         stops_distances),
-                    'trips_schedule': get_trip_schedules_from_dict(route.route_id)
+                    'trips_schedule': ast.literal_eval(bus_route_details_dict[route.route_id]["schedule"])
                 }
             ]
         }
+        cache.set(f'route_details_{route}', transit_routes)
         return jsonify(transit_routes), 200
     except Exception as e:
         print(e)
@@ -231,9 +215,7 @@ def get_transit_route_details_func(route):
 
 
 def get_routes_on_stop_func(stop_id, time=None):
-    val = BusRoutesDetail.query.all()
-    for v in val:
-        bus_route_details_dict[v.route_id] = (v.start_stop, v.end_stop)
+    set_dict()
     # if time is None:
     #     query_time = datetime.datetime.now().time()
     # else:
@@ -242,14 +224,20 @@ def get_routes_on_stop_func(stop_id, time=None):
     val = BusNextStop.query.all()
     for v in val:
         bus_next_stop_dict[v.cur_stop] = v.next_stop_name
-    routes = list(set(trips_df[trips_df.trip_id.isin(
-        stop_times_df[stop_times_df.stop_id == stop_id].trip_id.tolist())].route_id.tolist()))
+    routes = (
+        BusTrip.query
+        .join(BusStopTime, BusTrip.trip_id == BusStopTime.trip_id)
+        .with_entities(distinct(BusTrip.route_id))
+        .filter(BusStopTime.stop_id == stop_id)
+        .all()
+    )
+    if len(routes) != 0:
+        routes = [x[0] for x in routes]
     routes_on_stop = {'status': '', 'description': '', 'stop_name': stop.stop_name,
                       'next_stop': bus_next_stop_dict[stop.stop_id],
                       'updated_at': datetime.datetime.now().time().strftime("%H:%M:%S")}
     upcoming_routes = []
     for route in routes:
-        print(route)
         rt = BusRoute.query.filter(BusRoute.route_id == route).one()
         trip_schedule = get_trip_schedules_from_static(rt.route_id, int(stop_id))
         trip_times = [datetime.datetime.strptime(time_str, "%H:%M").time() for time_str in trip_schedule]
@@ -277,13 +265,24 @@ def get_routes_on_stop_func(stop_id, time=None):
 
 
 def get_trip_schedules_from_static(route_id, stop_id=0):
-    return [convert_to_h_m(x) for x in stop_times_df.loc[
-        stop_times_df.trip_id.isin(trips_df[trips_df.route_id == int(route_id)].trip_id.tolist()) &
-        (stop_times_df.stop_sequence == stop_id), 'arrival_time'].tolist()]
+    arrival_times = (
+        BusStopTime.query
+        .join(BusTrip, BusTrip.trip_id == BusStopTime.trip_id)
+        .with_entities(BusStopTime.arrival_time)
+        .filter(BusTrip.route_id == route_id, BusStopTime.stop_sequence == stop_id)
+        .all()
+    )
+    if len(arrival_times) > 0:
+        return [convert_to_h_m(x[0]) for x in arrival_times]
+    else:
+        return []
+    # return [convert_to_h_m(x) for x in stop_times_df.loc[
+    #     stop_times_df.trip_id.isin(trips_df[trips_df.route_id == int(route_id)].trip_id.tolist()) &
+    #     (stop_times_df.stop_sequence == stop_id), 'arrival_time'].tolist()]
 
 
-def get_trip_schedules_from_dict(route_id):
-    return ast.literal_eval(schedule_df.at[route_id, 'schedule'])
+# def get_trip_schedules_from_dict(route_id):
+#     return ast.literal_eval(schedule_df.at[route_id, 'schedule'])
     # return ast.literal_eval(schedule_df[schedule_df.route_id == route_id].schedule.squeeze())
 
 
@@ -296,83 +295,89 @@ def convert_to_h_m(time):
     return time_obj.strftime("%H:%M")
 
 
-def make_combined_response():
-    # Initialize the dictionary to store next stop data
-    bus_next_stop_dict = {}
-    val = BusNextStop.query.all()
-    for v in val:
-        bus_next_stop_dict[v.cur_stop] = v.next_stop_name
-
-    all_stops = BusStop.query.all()
-    stops_data = [
-        {
-            'id': stop.stop_id,
-            'name': stop.stop_name,
-            'lat': float(stop.stop_lat),
-            'lon': float(stop.stop_lon),
-            'next_stop': bus_next_stop_dict[stop.stop_id],
-            'type': 'bus',
-            'city': 'pun',
-            'agency': 'rrl'
-        }
-        for stop in all_stops
-    ]
-
-    routes_data = []
-    routes = BusRoute.query.all()
-    for route in routes:
-        try:
-            route_id = route.route_id
-            bus_all_route = BusAllRoute.query.filter_by(route_id=route.route_id).one()
-            stops_details = ast.literal_eval(bus_all_route.stops_details)
-            stops = [{'stop_id': x[0], 'name': x[1], 'lat': float(x[2]), 'lon': float(x[3])} for x in stops_details]
-
-            only_route, direction = get_direction(route.route_long_name)
-            start_stop = stops[0]['name'] if stops else None
-            end_stop = stops[-1]['name'] if stops else None
-
-            bus_route_stop_distance = BusRouteStopDistance.query.filter_by(route_id=route.route_id).one()
-            stops_distance = ast.literal_eval(bus_route_stop_distance.stops_distances)
-
-            trips_schedule = get_trip_schedules_from_dict(route_id)
-            trips_count = len(trips_schedule)
-
-            route_data = {
-                'id': route_id,
-                'direction': direction,
-                'route': only_route,
-                'short_name': None,
-                'long_name': route.route_long_name,
-                'description': route.route_desc,
-                'polyline': get_polyline(route.route_id),
-                'city': 'pun',
-                'type': 'bus',
-                'trips_schedule': trips_schedule,
-                'stops': [x['stop_id'] for x in stops],
-                'stops_distance': stops_distance,
-                'agency': route.agency_id,
-                'end': end_stop,
-                'start': start_stop,
-                'trips_count': trips_count,
-            }
-            routes_data.append(route_data)
-        except Exception as e:
-            print(f"Failed to process route {route.route_id}: {e}")
-
-    response = {
-        'status': 'success',
-        'description': '',
-        'routes': routes_data,
-        'stops': stops_data
-    }
-
-    return jsonify(response), 200
+# def make_combined_response():
+#     # Initialize the dictionary to store next stop data
+#     bus_next_stop_dict = cache.get("bus_next_stop_dict")
+#     if bus_next_stop_dict is None:
+#         bus_next_stop_dict = {}
+#         val = BusNextStop.query.all()
+#         for v in val:
+#             bus_next_stop_dict[v.cur_stop] = v.next_stop_name
+#
+#     all_stops = BusStop.query.all()
+#     stops_data = [
+#         {
+#             'id': stop.stop_id,
+#             'name': stop.stop_name,
+#             'lat': float(stop.stop_lat),
+#             'lon': float(stop.stop_lon),
+#             'next_stop': bus_next_stop_dict[stop.stop_id],
+#             'type': 'bus',
+#             'city': 'rkt',
+#             'agency': 'rrl'
+#         }
+#         for stop in all_stops
+#     ]
+#
+#     routes_data = []
+#     routes = BusRoute.query.all()
+#     for route in routes:
+#         try:
+#             route_id = route.route_id
+#             bus_all_route = BusAllRoute.query.filter_by(route_id=route.route_id).one()
+#             stops_details = ast.literal_eval(bus_all_route.stops_details)
+#             stops = [{'stop_id': x[0], 'name': x[1], 'lat': float(x[2]), 'lon': float(x[3])} for x in stops_details]
+#
+#             only_route, direction = get_direction(route.route_long_name)
+#             start_stop = stops[0]['name'] if stops else None
+#             end_stop = stops[-1]['name'] if stops else None
+#
+#             bus_route_stop_distance = BusRouteStopDistance.query.filter_by(route_id=route.route_id).one()
+#             stops_distance = ast.literal_eval(bus_route_stop_distance.stops_distances)
+#
+#             trips_schedule = get_trip_schedules_from_dict(route_id)
+#             trips_count = len(trips_schedule)
+#
+#             route_data = {
+#                 'id': route_id,
+#                 'direction': direction,
+#                 'route': only_route,
+#                 'short_name': None,
+#                 'long_name': route.route_long_name,
+#                 'description': route.route_desc,
+#                 'polyline': get_polyline(route.route_id),
+#                 'city': 'pun',
+#                 'type': 'bus',
+#                 'trips_schedule': trips_schedule,
+#                 'stops': [x['stop_id'] for x in stops],
+#                 'stops_distance': stops_distance,
+#                 'agency': route.agency_id,
+#                 'end': end_stop,
+#                 'start': start_stop,
+#                 'trips_count': trips_count,
+#             }
+#             routes_data.append(route_data)
+#         except Exception as e:
+#             print(f"Failed to process route {route.route_id}: {e}")
+#
+#     response = {
+#         'status': 'success',
+#         'description': '',
+#         'routes': routes_data,
+#         'stops': stops_data
+#     }
+#
+#     return jsonify(response), 200
 
 
 def get_nearby_stop_bus(query_coords):
-    val = BusNextStop.query.all()
-    for v in val:
-        bus_next_stop_dict[v.cur_stop] = v.next_stop_name
+    bus_next_stop_dict = cache.get("bus_next_stop_dict")
+    if bus_next_stop_dict is None:
+        bus_next_stop_dict = {}
+        val = BusNextStop.query.all()
+        for v in val:
+            bus_next_stop_dict[v.cur_stop] = v.next_stop_name
+        cache.set('bus_next_stop_dict', bus_next_stop_dict)
     try:
         q_lat = float(query_coords[0])
         q_lng = float(query_coords[1])
@@ -400,26 +405,26 @@ def get_nearby_stop_bus(query_coords):
         return jsonify(resp), 400
 
 
-def get_fare_estimate(route, start_idx, end_idx, fare=None):
-    resp = {'data': {}, 'status': '', 'message': ''}
-    try:
-        if fare is not None:
-            fare = get_stop_by_amount(route, start_idx, fare)
-        else:
-            fare = get_fare_by_idx(route, start_idx, end_idx)
-        if fare is not None:
-            resp['data'] = {'fare': fare}
-            resp['status'] = 'success'
-            resp['message'] = 'Fare estimate successful'
-        else:
-            resp['data'] = {'fare': None}
-            resp['status'] = 'failed'
-            resp['message'] = f'Fare estimate failed.'
-    except Exception as e:
-        resp['data'] = {'fare': None}
-        resp['status'] = 'failed'
-        resp['message'] = f'Fare estimate failed due to {e}'
-    return resp, 200
+# def get_fare_estimate(route, start_idx, end_idx, fare=None):
+#     resp = {'data': {}, 'status': '', 'message': ''}
+#     try:
+#         if fare is not None:
+#             fare = get_stop_by_amount(route, start_idx, fare)
+#         else:
+#             fare = get_fare_by_idx(route, start_idx, end_idx)
+#         if fare is not None:
+#             resp['data'] = {'fare': fare}
+#             resp['status'] = 'success'
+#             resp['message'] = 'Fare estimate successful'
+#         else:
+#             resp['data'] = {'fare': None}
+#             resp['status'] = 'failed'
+#             resp['message'] = f'Fare estimate failed.'
+#     except Exception as e:
+#         resp['data'] = {'fare': None}
+#         resp['status'] = 'failed'
+#         resp['message'] = f'Fare estimate failed due to {e}'
+#     return resp, 200
 
 
 def get_fare_estimate_v2(route, start_idx, end_idx, fare=None):
@@ -441,25 +446,24 @@ def get_fare_estimate_v2(route, start_idx, end_idx, fare=None):
     return resp, 200
 
 
-
-def get_fare_options(route, start_idx):
-    resp = {'data': {}, 'status': '', 'message': ''}
-    fare = get_fare_options_from_source_v2(route, start_idx)
-    if fare is not None:
-        try:
-            resp['data'] = generate_fare_options_response(fare)
-            resp['status'] = 'success'
-            resp['message'] = 'Fare options fetched successful'
-            return resp, 200
-        except Exception:
-            resp['data'] = {'fare': None}
-            resp['status'] = 'failed'
-            resp['message'] = f'Fare estimate failed.'
-    else:
-        resp['data'] = {'fare': None}
-        resp['status'] = 'failed'
-        resp['message'] = f'Fare estimate failed.'
-    return resp, 400
+# def get_fare_options(route, start_idx):
+#     resp = {'data': {}, 'status': '', 'message': ''}
+#     fare = get_fare_options_from_source_v2(route, start_idx)
+#     if fare is not None:
+#         try:
+#             resp['data'] = generate_fare_options_response(fare)
+#             resp['status'] = 'success'
+#             resp['message'] = 'Fare options fetched successful'
+#             return resp, 200
+#         except Exception:
+#             resp['data'] = {'fare': None}
+#             resp['status'] = 'failed'
+#             resp['message'] = f'Fare estimate failed.'
+#     else:
+#         resp['data'] = {'fare': None}
+#         resp['status'] = 'failed'
+#         resp['message'] = f'Fare estimate failed.'
+#     return resp, 400
 
 
 def get_fare_options_v2(route, start_idx):
@@ -482,38 +486,38 @@ def get_fare_options_v2(route, start_idx):
     return resp, 400
 
 
-def generate_fare_options_response(fare_dict):
-    fare_list = []
-    current_fare = None
-    start_stop_index = None
-    for idx, fare in fare_dict.items():
-        if fare != current_fare:
-            if current_fare is not None:
-                # Append the previous fare segment
-                fare_list.append({
-                    "start_stop_index": start_stop_index,
-                    "end_stop_index": int(idx) - 1,
-                    "basic_fare": float(current_fare['basic']),
-                    "toll": current_fare['toll'],
-                    "total_fare": float(current_fare['total']),
-                    "amount_payable_by_user": float(current_fare['total']),
-                    "discount_percentage": 0
-                })
-            # Update variables for the new fare segment
-            current_fare = fare
-            start_stop_index = int(idx)
-
-    fare_list.append({
-        "start_stop_index": start_stop_index,
-        "end_stop_index": int(idx),
-        "basic_fare": float(current_fare['basic']),
-        "toll": current_fare['toll'],
-        "total_fare": float(current_fare['total']),
-        "amount_payable_by_user": float(current_fare['total']),
-        "discount_percentage": 0
-    })
-
-    return fare_list
+# def generate_fare_options_response(fare_dict):
+#     fare_list = []
+#     current_fare = None
+#     start_stop_index = None
+#     for idx, fare in fare_dict.items():
+#         if fare != current_fare:
+#             if current_fare is not None:
+#                 # Append the previous fare segment
+#                 fare_list.append({
+#                     "start_stop_index": start_stop_index,
+#                     "end_stop_index": int(idx) - 1,
+#                     "basic_fare": float(current_fare['basic']),
+#                     "toll": current_fare['toll'],
+#                     "total_fare": float(current_fare['total']),
+#                     "amount_payable_by_user": float(current_fare['total']),
+#                     "discount_percentage": 0
+#                 })
+#             # Update variables for the new fare segment
+#             current_fare = fare
+#             start_stop_index = int(idx)
+#
+#     fare_list.append({
+#         "start_stop_index": start_stop_index,
+#         "end_stop_index": int(idx),
+#         "basic_fare": float(current_fare['basic']),
+#         "toll": current_fare['toll'],
+#         "total_fare": float(current_fare['total']),
+#         "amount_payable_by_user": float(current_fare['total']),
+#         "discount_percentage": 0
+#     })
+#
+#     return fare_list
 
 
 def generate_fare_options_response_v2(fare_dict):
@@ -555,16 +559,24 @@ def generate_fare_options_response_v2(fare_dict):
 
 
 def get_schedule_on_stop_func(route, stop_id, _time=None):
+    set_dict()
     if _time is None or _time == '':
         _time = datetime.datetime.now().time()
     response = {}
     try:
-        BusStopTimeAlias = aliased(BusStopTime)
-        route_id = BusRoute.query.filter(BusRoute.route_long_name == route).one().route_id
-        trips = [x.trip_id for x in BusTrip.query.filter(BusTrip.route_id == route_id).all()]
-        schedule = [x.arrival_time[:-3] for x in BusStopTime.query.filter(and_(BusStopTime.trip_id.in_(trips),
-                                                                          (BusStopTime.stop_id == stop_id),
-                                                                          (BusStopTime.arrival_time > _time))).all()]
+        schedule = (
+            BusStopTime.query
+            .join(BusTrip, BusStopTime.trip_id == BusTrip.trip_id)
+            .join(BusRoute, BusRoute.route_id == BusTrip.route_id)
+            .with_entities(BusStopTime.arrival_time)
+            .filter(
+                BusRoute.route_long_name == route,
+                BusStopTime.stop_id == stop_id,
+                BusStopTime.arrival_time > _time
+            )
+            .all()
+        )
+        schedule = [x[0][:-3] for x in schedule]
         if len(schedule) > 0:
             response['data'] = schedule
             response['status'] = 'success'
@@ -576,9 +588,8 @@ def get_schedule_on_stop_func(route, stop_id, _time=None):
             response['data'] = []
         return jsonify(response), 200
     except Exception as e:
-        logging.log(level=40, msg=f'get_schedule_on_stop_func {e}')
         response['status'] = 'failed'
-        response['description'] = 'No upcoming schedule available'
+        response['description'] = 'Unable to fetch schedule'
         return jsonify(response), 400
 
 

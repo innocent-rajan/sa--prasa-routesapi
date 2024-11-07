@@ -1,5 +1,3 @@
-/instance/db.sqlite3
-/users.sqlite3
 .env
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/inspectionProfiles/Project_Default.xml
@@ -10,5 +8,5 @@
 /.idea/vcs.xml
 /.idea/*
 /venv/
-/instance/
-static
+/instance/_db.sqlite3
+#static

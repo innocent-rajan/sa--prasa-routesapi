@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-service
+  template:
+    metadata:
+      labels:
+        app: api-service
+    spec:
+      containers:
+        - name: api-service
+          image: 178761578367.dkr.ecr.ap-south-1.amazonaws.com/rajkot-rrl-routesapi:dev
+          imagePullPolicy: Always
+          args: ["api-service", "--workers", "2", "-k", "sync", "--timeout", "60"]
+          envFrom:
+            - configMapRef:
+                name: env-secrets
+          ports:
+            - containerPort: 8000
+              name: api-service
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: "200m"
+            limits:
+              memory: "2048Mi"
+              cpu: "500m"

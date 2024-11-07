@@ -82,6 +82,8 @@ class BusRoutesDetail(db.Model):
     route_id = db.Column(db.String(), db.ForeignKey('bus_route.route_id'), nullable=False, primary_key=True)
     start_stop = db.Column(db.String(), db.ForeignKey('bus_stop.stop_id'), nullable=False)
     end_stop = db.Column(db.String(), db.ForeignKey('bus_stop.stop_id'), nullable=False)
+    schedule = db.Column(db.String())
+    polyline = db.Column(db.String())
 
     def __repr__(self):
         return f"<BusRoutesDetail {self.route_id}>"

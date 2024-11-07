@@ -22,6 +22,27 @@ bus_stops_df = pd.read_csv(static_path_bus + 'stops.txt')
 bus_trips_df = pd.read_csv(static_path_bus + 'trips.txt')
 bus_stop_times_df = pd.read_csv(static_path_bus + 'stop_times.txt')
 bus_shapes_df = pd.read_csv(static_path_bus + 'shapes.txt')
+schedule_df = pd.read_csv(static_path_bus + 'schedule.csv', dtype={'route_id': 'str'})
+schedule_df.set_index('route_id', inplace=True)
+
+try:
+    polylines_df = pd.read_csv(static_path_bus + 'polylines.csv', dtype={'route_id': 'str'})
+    polylines_df.set_index('route_id', inplace=True)
+except FileNotFoundError as e:
+    print(e)
+    polylines_df = pd.DataFrame()
+
+
+def get_polyline(route_id):
+    filtered_df = polylines_df.at[route_id, 'polyline']
+    if filtered_df == '':
+        return ''
+    else:
+        return filtered_df
+
+
+def get_trip_schedules_from_dict(route_id):
+    return ast.literal_eval(schedule_df.at[route_id, 'schedule'])
 
 
 def add_routes_bus():
@@ -55,6 +76,7 @@ def add_trips_bus():
         try:
             conn.execute(BusTrip.__table__.insert(), val)
             conn.execute(text("CREATE INDEX ix_bus_trips_trip_id_index ON bus_trip (trip_id)"))
+            conn.execute(text("CREATE INDEX ix_bus_trips_route_id_index ON bus_trip (route_id)"))
             conn.commit()
         except Exception as e:
             print(f'add_trips_bus {e}')
@@ -68,6 +90,7 @@ def add_stop_times_bus():
         try:
             conn.execute(BusStopTime.__table__.insert(), val)
             conn.execute(text("CREATE INDEX ix_bus_stop_times_trip_id_index ON bus_stop_time (trip_id)"))
+            conn.execute(text("CREATE INDEX ix_bus_stop_time_stop_sequence_index ON bus_stop_time (stop_sequence)"))
             conn.commit()
         except Exception as e:
             print(f'add_stop_times_bus {e}')
@@ -145,6 +168,8 @@ def set_route_details_bus():
                     arv = ast.literal_eval(ar)
                     route_details.start_stop = BusStop.query.filter_by(stop_id=arv[0][0]).first().stop_id
                     route_details.end_stop = BusStop.query.filter_by(stop_id=arv[-1][0]).first().stop_id
+                    route_details.polyline = get_polyline(route_details.route_id)
+                    route_details.schedule = str(get_trip_schedules_from_dict(route_details.route_id))
 
                     session.add(route_details)
                 except Exception as e:
@@ -176,7 +201,7 @@ def set_route_details_bus_():
                     arv = ast.literal_eval(ar)
                     route_details.start_stop = BusStop.query.filter_by(stop_id=arv[0][0]).first().stop_id
                     route_details.end_stop = BusStop.query.filter_by(stop_id=arv[-1][0]).first().stop_id
-        
+
                     conn.add(route_details)
                     conn.commit()
                 except Exception as e:
@@ -225,7 +250,7 @@ def set_transit_route_stops_dist_bus():
 
 def set_transit_route_stops_dist_bus_():
     a = 'Added route distances.'
-    
+
     with db.engine.begin() as conn:
         try:
             for r in bus_routes_df.route_id:
@@ -243,7 +268,7 @@ def set_transit_route_stops_dist_bus_():
                 conn.commit()
                 # print(r)
             conn.execute(text("CREATE INDEX ix_bus_route_stops_distance_route_id_index ON bus_route_stop_distance"
-                          "(route_id)"))
+                              "(route_id)"))
         except Exception as e:
             print(f'set_transit_route_stops_dist_bus {e}')
 
@@ -314,25 +339,26 @@ def set_next_stop_bus_():
                             stops_dict[arv[j][0]].append(arv[j + 1][0])
                         else:
                             stops_dict[arv[j][0]] = [arv[j + 1][0]]
-        
+
             all_stops = BusStop.query.all()
             all_stops = [x.stop_id for x in all_stops]
-        
+
             for s in all_stops:
                 next_stop = BusNextStop()
                 next_stop.cur_stop = BusStop.query.filter_by(stop_id=s).first().stop_id
                 try:
                     next_stop.next_stop = BusStop.query.filter_by(stop_id=max(stops_dict[s], key=stops_dict[s].count)) \
                         .first().stop_id
-                    next_stop.next_stop_name = BusStop.query.filter_by(stop_id=max(stops_dict[s], key=stops_dict[s].count)) \
+                    next_stop.next_stop_name = BusStop.query.filter_by(
+                        stop_id=max(stops_dict[s], key=stops_dict[s].count)) \
                         .first().stop_name
                 except KeyError:
                     next_stop.next_stop = -1
                     next_stop.next_stop_name = 'Terminal'
-        
+
                 conn.add(next_stop)
                 conn.commit()
-        
+
                 conn.execute(text("CREATE INDEX ix_bus_next_stop_cur_stop_index ON bus_next_stop (cur_stop)"))
         except Exception as e:
             print(f'set_next_stop_bus {e}')
@@ -377,7 +403,7 @@ def generate_polylines():
 
     # Create DataFrame from lists
     polyline_df = pd.DataFrame({'route_id': route_ids, 'polyline': polylines})
-    polyline_df.to_csv(static_path_bus+'polylines.csv', index=False)
+    polyline_df.to_csv(static_path_bus + 'polylines.csv', index=False)
 
     return polyline_df
 
@@ -392,7 +418,7 @@ def generate_bus_route_details():
         end = BusStop.query.filter_by(stop_id=arv[-1][0]).first()
         val.append([start.stop_name, start.stop_id, end.stop_name, end.stop_id, end.stop_lat, end.stop_lon, r])
     df = pd.DataFrame([dict(zip(headers, x)) for x in val])
-    df.to_csv(static_path_bus+'bus_route_details.csv', index_label='id', columns=headers)
+    df.to_csv(static_path_bus + 'bus_route_details.csv', index_label='id', columns=headers)
 
 
 def generate_schedule():
@@ -401,7 +427,7 @@ def generate_schedule():
         schedule_dict[r] = str(get_trip_schedules_from_static(r))
     df = pd.DataFrame.from_dict(schedule_dict, orient='index')
     df.columns = ['schedule']
-    df.to_csv(static_path_bus+'schedule.csv', index_label='route_id')
+    df.to_csv(static_path_bus + 'schedule.csv', index_label='route_id')
 
 
 def set_data():
