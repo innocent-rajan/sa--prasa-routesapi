@@ -94,7 +94,7 @@ def get_routes_func():
                     'polyline': bus_route_details_dict[route.route_id]['polyline'],
                     'trips_schedule': trips,
                     'trips_count': len(trips),
-                    'city': 'pun',
+                    'city': 'rkt',
                     'agency': route.agency_id
                 })
             cache.set('routes', all_routes)
@@ -264,21 +264,23 @@ def get_routes_on_stop_func(stop_id, time=None):
     return jsonify(routes_on_stop), 400
 
 
-def get_trip_schedules_from_static(route_id, stop_id=0):
-    arrival_times = (
-        BusStopTime.query
-        .join(BusTrip, BusTrip.trip_id == BusStopTime.trip_id)
-        .with_entities(BusStopTime.arrival_time)
-        .filter(BusTrip.route_id == route_id, BusStopTime.stop_sequence == stop_id)
-        .all()
-    )
-    if len(arrival_times) > 0:
-        return [convert_to_h_m(x[0]) for x in arrival_times]
-    else:
-        return []
-    # return [convert_to_h_m(x) for x in stop_times_df.loc[
-    #     stop_times_df.trip_id.isin(trips_df[trips_df.route_id == int(route_id)].trip_id.tolist()) &
-    #     (stop_times_df.stop_sequence == stop_id), 'arrival_time'].tolist()]
+def get_trip_schedules_from_static(route_id, stop_id=0, stop_times_df=None, trips_df=None):
+    try:
+        arrival_times = (
+            BusStopTime.query
+            .join(BusTrip, BusTrip.trip_id == BusStopTime.trip_id)
+            .with_entities(BusStopTime.arrival_time)
+            .filter(BusTrip.route_id == route_id, BusStopTime.stop_sequence == stop_id)
+            .all()
+        )
+        if len(arrival_times) > 0:
+            return [convert_to_h_m(x[0]) for x in arrival_times]
+        else:
+            return []
+    except:
+        return [convert_to_h_m(x) for x in stop_times_df.loc[
+            stop_times_df.trip_id.isin(trips_df[trips_df.route_id == int(route_id)].trip_id.tolist()) &
+            (stop_times_df.stop_sequence == stop_id), 'arrival_time'].tolist()]
 
 
 # def get_trip_schedules_from_dict(route_id):

@@ -424,7 +424,7 @@ def generate_bus_route_details():
 def generate_schedule():
     schedule_dict = dict()
     for r in bus_routes_df.route_id:
-        schedule_dict[r] = str(get_trip_schedules_from_static(r))
+        schedule_dict[r] = str(get_trip_schedules_from_static(r, stop_times_df=bus_stop_times_df, trips_df=bus_trips_df))
     df = pd.DataFrame.from_dict(schedule_dict, orient='index')
     df.columns = ['schedule']
     df.to_csv(static_path_bus + 'schedule.csv', index_label='route_id')
