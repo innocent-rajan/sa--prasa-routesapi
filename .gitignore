@@ -14,7 +14,5 @@
 __pycache__/
 *.pyc
 .DS_Store
-instance/*.db
-instance/*.sqlite3
 instance/db.sqlite3.bak_*
 static/data/_GTFS/
