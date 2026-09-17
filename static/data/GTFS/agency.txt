@@ -1,2 +1,2 @@
-agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone,agency_fare_url,agency_email
-RRL,Rajkot Rajpath Limited,http://www.rajkotrajpath.com/,Asia/Kolkata,,,,
+agency_id,agency_name,agency_url,agency_timezone,agency_lang
+1,PRASA Metrorail,https://www.prasa.com,Africa/Johannesburg,en

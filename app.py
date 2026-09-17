@@ -1,7 +1,8 @@
 import os
 
 from dotenv import load_dotenv
-from elasticapm.contrib.flask import ElasticAPM
+# from elasticapm.contrib.flask import ElasticAPM
+from flasgger import Swagger
 from flask import Flask
 from flask_compress import Compress
 from flask_cors import CORS
@@ -36,6 +37,29 @@ def create_app():
     Compress(app)
     CORS(app)
 
+    # Swagger UI at /apidocs for mobile-app integration
+    Swagger(app, template={
+        'swagger': '2.0',
+        'info': {
+            'title': 'PRASA Routes API',
+            'description': 'Routes, stops, schedules and fares for PRASA Metrorail '
+                           '(route_type=2) and long-distance coaches (route_type=3). '
+                           'All endpoints require the x-api-key header. '
+                           'IDs are the merged ID space: metro routes 1-34, coach '
+                           'routes 1001-1040; metro stops 1-274, coach stops 10001+.',
+            'version': '2.0.0',
+        },
+        'securityDefinitions': {
+            'ApiKeyAuth': {
+                'type': 'apiKey',
+                'in': 'header',
+                'name': 'x-api-key',
+                'description': 'API key for all passenger endpoints',
+            }
+        },
+        'security': [{'ApiKeyAuth': []}],
+    })
+
     # Set configuration settings
     app.config.from_pyfile('config.cfg')
     app.config['SECRET_KEY'] = SECRET_KEY
@@ -67,15 +91,15 @@ def create_app():
 
 app = create_app()
 redis_client = FlaskRedis(app)
-apm = ElasticAPM(app)
+# apm = ElasticAPM(app)
 
 # app.wsgi_app = ProfilerMiddleware(app.wsgi_app, profile_dir='./profs', filename_format="{method}.{path}.prof")
 
-# from db_operations.add_data import set_data
+from db_operations.add_data import set_data
 
 # with app.app_context():
-#     db.create_all()
-#     set_data()
+    # db.create_all()
+    # set_data()
 
 
 @app.route('/')

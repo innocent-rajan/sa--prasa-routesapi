@@ -1,169 +1,75 @@
 id,start,start_id,end,end_id,lat,lng,route_id_id
-0,Indraprasth Society /Morby Road crossing,1315,matru darshan School,1330,22.252287,70.796921,126
-1,Trikon baug,1038,Shreenathji Industries Plot No.155,1279,22.36541,70.963509,123
-2,Greenland Chowk,1112,Government Engineering College,1223,22.246086,70.739998,121
-3,BajrangWadi circle,398,Bhaktinagar Circle,42,22.280199,70.8022,94
-4,Bhaktinagar Circle,42,badhinu patiyu,389,22.370399,70.692001,51
-5,Kothariya Gam,1016,Labhubhai eng. Collage,1245,22.246086,70.739998,119
-6,Trikon baug,1038,Raiyadhar Slum Quarter,1192,22.315752,70.755424,114
-7,Saurashtra University,121,Arpit eng. Collage (Hadala Gam),482,22.435499,70.781601,69
-8,Trikon baug,1038,Kothariya Solvant fatak,1174,22.2248,70.803192,113
-9,Trikon baug,21,Shapar Veraval,0,22.1579,70.791496,1
-10,Kothariya Solvant fatak,1174,Trikon baug,1038,22.29497,70.801689,112
-11,Labhubhai eng. Collage,549,Greenland Chowk,56,22.3116,70.828598,97
-12,Ruda Aavash - Sarita Vihar Society,1159,Trikon baug,1038,22.29497,70.801689,110
-13,Trikon baug,1038,Kothariya Solavant fatak,1301,22.224871,70.803185,125
-14,Mahika village,1158,Prajapati Chowk,1129,22.32317,70.759941,109
-15,Arpit eng. Collage (Hadala Gam),1127,150 feet road crossing - kalawad road,1056,22.27075,70.745621,107
-16,131 slum quater.,179,Jivraj Park,281,22.261,70.767998,33
-17,Global Chowk,1075,Trikon baug,1038,22.29497,70.801689,104
-18,Kothariya Chowk,52,Lal bahadurshastri aavas,23,22.33923,70.780197,3
-19,Trikon baug,1038,Naranka Gram,1000,22.119537,70.857292,101
-20,Naranka Gram,1000,Trikon baug,1038,22.29497,70.801689,100
-21,Trikon baug,21,Trikon baug,21,22.295462,70.801727,43
-22,Arpit eng. Collage (Hadala Gam),482,Saurashtra University,121,22.290501,70.743698,98
-23,Kothariya Solavant fatak,1301,Trikon baug,1038,22.29497,70.801689,124
-24,G.I.D.C. Gate 3,1372,K.K.V hall,1064,22.28574,70.771133,135
-25,Tramba Village,132,Shivalay Chowk,24,22.3368,70.786797,93
-26,Shapar-Veraval,1039,Trikon baug,1038,22.29497,70.801689,102
-27,Shivalay Chowk,24,Tramba Village,132,22.2281,70.910797,92
-28,Shreenathji Industries Plot No.155,1279,Trikon baug,1038,22.29497,70.801689,122
-29,Ramvan,1195,Parapipaliya patiya,1219,22.343306,70.736671,116
-30,Vavadi Gam (Vraj Villa Apartment),193,131 slum quater.,179,22.314199,70.795403,19
-31,Gondal Chowk (RMTS),1310,Ribda Railway Station,1340,22.125988,70.800606,131
-32,Trikon baug,21,Atal Sarovar,537,22.3204,70.734703,91
-33,Raiya Village (Shilpan Onex),447,Tramba Village,132,22.2281,70.910797,89
-34,Parsananagar,370,Tramba Village,132,22.2281,70.910797,44
-35,Tramba Village,132,Raiya Village (Shilpan Onex),447,22.295601,70.749298,88
-36,Madhapar Chowk (RMTS),1702,AIIM Hospital,523,22.371099,70.749199,87
-37,Trikon baug,21,Government Engineering College,517,22.2446,70.742996,83
-38,Government Engineering College,517,Trikon baug,21,22.295462,70.801727,82
-39,Arpit eng. Collage (Hadala Gam),482,Gondal Chowk (RMTS),9,22.243,70.800003,80
-40,Gondal Chowk (RMTS),9,Arpit eng. Collage (Hadala Gam),482,22.435499,70.781601,81
-41,Arpit eng. Collage,1515,Gondal Chowk (RMTS),1310,22.24304,70.79998,152
-42,Raiyadhar Slum Quarter,320,Trikon baug,21,22.295462,70.801727,36
-43,Kothariya Gam,74,ITI (Khirasara),87,22.2341,70.652901,9
-44,131 slum quater.,179,Vavadi Gam (Vraj Villa Apartment),192,22.236799,70.783302,18
-45,Atal Sarovar,532,Trikon baug,21,22.295462,70.801727,90
-46,Kothariya Gam,74,Saurashtra University,121,22.290501,70.743698,11
-47,Saurashtra University,121,Kothariya Gam,74,22.22434,70.801781,10
-48,Santiniketan Avenue(Raiya Gaam),244,Shapar Veraval,0,22.1579,70.791496,27
-49,Gondal Chowk (BRTS),2000,Madhapar Chowk (BRTS),2019,22.328686,70.769203,166
-50,Swaminarayan vidhyalay,1409,AIIMS Hospital,1388,22.37108,70.749153,139
-51,Saurashtra University,121,Arpit eng. Collage (Hadala Gam),482,22.435499,70.781601,99
-52,Pradhanmantri Avash Yojna,276,H.N.Shukla College,246,22.295,70.860603,29
-53,Ghanteshvar S.R.P. Camp (Main Gate),511,Radha Park (Kotharia Gam),504,22.233,70.810303,79
-54,Parsana Chowk,413,Madhapar Chowk (RMTS),219,22.329372,70.76889,56
-55,Gujarat Housing Board Quarter/ Sagar chowk,335,Jivraj Park,281,22.261,70.767998,39
-56,Veer Savarkar Nagar (avadh road),1554,Trikon baug,1038,22.29497,70.801689,158
-57,Silverpark -B Street No.-4,1553,Puneetnagar Main Road,1533,22.245808,70.793808,157
-58,Madhapar Chowk (RMTS),219,Parsana Chowk,413,22.2589,70.755302,57
-59,Trikon baug,21,Metoda Gam,279,22.236799,70.662903,31
-60,Vitthalbhai Raddia Chowk,1534,Trikon baug,1038,22.29497,70.801689,154
-61,Jivaraj Park (Vasant Vatika),455,Greenland Chowk,56,22.3116,70.828598,62
-62,Regional Science centre,412,Ajidam,146,22.277901,70.835899,55
-63,Trikon baug,1038,Shapar-Veraval,1039,22.158035,70.791786,103
-64,Vinod Nagar,408,Nandbhumi Tower,446,22.293501,70.749496,61
-65,Ridhhi Sidhhi Park Crossing,85,Bhagini Nivedita Township,399,22.335899,70.800301,53
-66,Trikon baug,21,Shapar Veraval,0,22.1579,70.791496,49
-67,Trikon baug,21,Raiyadhar Slum Quarter,320,22.315901,70.754898,37
-68,H.N.Shukla College,246,Criste collage,387,22.2908,70.725998,46
-69,Gondal Chowkdi,1491,Pradhyuman Park,1483,22.29911,70.839172,149
-70,Kothariya Gam,1016,Parapipaliya Gaam,1450,22.355082,70.74131,145
-71,Sat hanuman Temple,1573,Trikon baug,1038,22.29497,70.801689,162
-72,Trikon baug,1038,Vitthalbhai Raddia Chowk,1534,22.2495,70.764122,155
-73,Tramba Village,1582,Greenland Chowk,1112,22.31159,70.828644,164
-74,Shapar Veraval,0,Trikon baug,21,22.295462,70.801727,48
-75,Gondal Chowkdi,1511,Munjka chowkdi,1512,22.291332,70.731056,151
-76,Parapipaliya Gaam,1450,Kothariya Gam,1016,22.23411,70.817619,144
-77,Greenland Chowk,1112,ITI (Khirasara),1373,22.23406,70.652885,137
-78,Anandpar Gam,53,Swati Park,86,22.243999,70.8078,6
-79,Pradhyuman Park,1483,Gondal Chowkdi,1491,22.24304,70.79998,148
-80,District and Sessions court,1355,Bhaktinagar Station,1096,22.282961,70.794777,132
-81,Bhaktinagar Circle,1033,AIIM Hospital,1410,22.37108,70.749153,141
-82,Ghanteshvar S.R.P. Camp,230,Shapar Veraval,0,22.1579,70.791496,23
-83,150 feet kalawad road (katariya Chowkdi),1492,Gondal Chowkdi,1511,22.243738,70.79911,150
-84,Kothariya Gam,1016,Marwadi College,1121,22.36783,70.799637,129
-85,ITI (Khirasara),87,Kothariya Gam,74,22.22434,70.801781,8
-86,Aangan residency,190,Shantoshi nagar (Shyamji Krushna Varma Township),300,22.3342,70.795303,35
-87,AIIMS Hospital,1388,Swaminarayan vidhyalay,1409,22.280035,70.855881,138
-88,Bhagini Nivedita Township,399,Ridhhi Sidhhi Park Crossing,85,22.2421,70.807999,52
-89,Trikon baug,1038,Ruda Aavash - Sarita Vihar Society,1159,22.273603,70.752075,111
-90,Trikon baug,1038,Sat hanuman Temple,1573,22.325977,70.854027,163
-91,Trikon baug,1038,150 feet Jamnagar road crossing,1569,22.339781,70.809212,161
-92,Atal Sarovar,1752,H.N.Shukla College,246,22.295,70.860603,41
-93,Ajidam,146,Regional Science centre,412,22.3554,70.766998,54
-94,badhinu patiyu,389,Bhaktinagar Circle,42,22.280199,70.8022,50
-95,Trikon baug,1038,Veer Savarkar Nagar (avadh road),1554,22.273991,70.723938,159
-96,Anandpar Gam,53,huseni chawk (kothariya),77,22.220501,70.804001,4
-97,Pradhyuman Park,1483,Saurashtra University,1205,22.287258,70.750557,147
-98,Shivdhara Residency,1449,AIIM Hospital,1410,22.37108,70.749153,143
-99,Saurashtra University,121,Shivalay Chowk,24,22.3368,70.786797,59
-100,Ajidam,146,G.I.D.C. Gate 3,90,22.246799,70.673599,75
-101,150 feet Jamnagar road crossing,1569,Trikon baug,1038,22.29497,70.801689,160
-102,AIIM Hospital,1410,Bhaktinagar Circle,1033,22.28022,70.802177,140
-103,K.K.V hall,1064,G.I.D.C. Gate 3,1372,22.24675,70.673561,134
-104,Metoda Gam,279,Trikon baug,21,22.295462,70.801727,30
-105,Shivalay Chowk,24,Saurashtra University,121,22.290501,70.743698,58
-106,Greenland Chowk,56,Labhubhai eng. Collage,518,22.247499,70.738701,96
-107,Ribda Railway Station,1340,Gondal Chowk (RMTS),1310,22.24304,70.79998,130
-108,H.N.Shukla College,246,Light House (Raiya),352,22.303801,70.736504,40
-109,Bhaktinagar Station,1096,District and Sessions court,1355,22.329916,70.756447,133
-110,matru darshan School,1330,Indraprasth Society /Morby Road crossing,1315,22.325714,70.820381,127
-111,Government Engineering College,1223,Greenland Chowk,1112,22.31159,70.828644,120
-112,Arpit eng. Collage (Hadala Gam),482,Trikon baug,21,22.295462,70.801727,70
-113,Prajapati Chowk,1129,Mahika village,1158,22.272648,70.880409,108
-114,Punit Nagar (jetco 66 k.v.a.),317,Ghanteshvar S.R.P. Camp (G company),229,22.330099,70.737,76
-115,Shapar Veraval,0,Ghanteshvar S.R.P. Camp,230,22.3251,70.7444,22
-116,Trikon baug,21,Government Engineering College,517,22.2446,70.742996,85
-117,Shapar Veraval,0,Trikon baug,21,22.295462,70.801727,0
-118,Jivraj Park,281,Gujarat Housing Board Quarter/ Sagar chowk,335,22.292801,70.8321,38
-119,Trikon baug,21,Tramba Village,132,22.2281,70.910797,67
-120,Ajidam,146,G.I.D.C. Gate 3,90,22.246799,70.673599,17
-121,H.N.Shukla College,246,Pradhanmantri Avash Yojna,275,22.240601,70.784203,28
-122,Bhaktinagar Circle,42,BajrangWadi circle,398,22.3176,70.779999,95
-123,huseni chawk (kothariya),77,Anandpar Gam,53,22.316299,70.839302,5
-124,Trikon baug,21,Trikon baug,21,22.295462,70.801727,42
-125,Raiyadhar Slum Quarter,1192,Trikon baug,1038,22.29497,70.801689,115
-126,G.I.D.C. Gate 3,90,Ajidam,146,22.277901,70.835899,16
-127,150 feet road crossing - kalawad road,1056,Arpit eng. Collage (Hadala Gam),1127,22.435471,70.781578,106
-128,Puneetnagar Main Road,1533,Silverpark -B Street No.-4,1553,22.338139,70.822273,156
-129,Radha Park (Kotharia Gam),504,Ghanteshvar S.R.P. Camp (Main Gate),511,22.3302,70.736702,78
-130,Swati Park,86,Anandpar Gam,53,22.316299,70.839302,7
-131,Om Residency (Morbi road Crosing),481,Akshar Vatika(Mavadi),460,22.2661,70.770203,65
-132,Tramba Village,132,Parsananagar,370,22.318001,70.795799,45
-133,Saurashtra University,121,Tramba Village,132,22.2281,70.910797,13
-134,Criste collage,387,H.N.Shukla College,246,22.295,70.860603,47
-135,Jivraj Park,281,131 slum quater.,179,22.314199,70.795403,32
-136,G.I.D.C. Gate 3,90,Ajidam,146,22.277901,70.835899,74
-137,Ajidam,146,shree ram hospital(metoda),162,22.227501,70.677498,15
-138,Government Engineering College,1223,Kothariya Gam,1016,22.23411,70.817619,118
-139,Madhapar Chowk (BRTS),2019,Gondal Chowk (BRTS),2000,22.243141,70.79985,167
-140,Shantoshi nagar (Shyamji Krushna Varma Township),300,Aangan residency,190,22.233299,70.790398,34
-141,Marwadi College,1121,Kothariya Gam,1016,22.23411,70.817619,128
-142,Parapipaliya patiya,1219,Ramvan,1195,22.263145,70.831894,117
-143,Saurashtra University,1205,Pradhyuman Park,1483,22.29911,70.839172,146
-144,Shapar Veraval,0,Santiniketan Avenue(Raiya Gaam),244,22.308201,70.751099,26
-145,Trikon baug,21,Saurashtra University,121,22.290501,70.743698,21
-146,Gondal Chowk (RMTS),1310,Arpit eng. Collage,1515,22.435471,70.781578,153
-147,Trikon baug,1038,Global Chowk,1075,22.205547,70.800407,105
-148,AIIM Hospital,523,Madhapar Chowk (RMTS),1702,22.329372,70.76889,86
-149,Shapar Veraval,0,Santiniketan Avenue(Raiya Gaam),244,22.308201,70.751099,24
-150,shree ram hospital(metoda),162,Ajidam,146,22.277901,70.835899,14
-151,Saurashtra University,121,Trikon baug,21,22.295462,70.801727,20
-152,Lal bahadurshastri aavas,23,Kothariya Chowk,52,22.258301,70.816002,2
-153,Santiniketan Avenue(Raiya Gaam),244,Shapar Veraval,0,22.1579,70.791496,25
-154,Government Engineering College,517,Trikon baug,21,22.295462,70.801727,84
-155,Nandbhumi Tower,446,Vinod Nagar,408,22.257099,70.811798,60
-156,ITI (Khirasara),1373,Greenland Chowk,1112,22.31159,70.828644,136
-157,Greenland Chowk,56,Jivaraj Park (Vasant Vatika),455,22.2598,70.771797,63
-158,Tramba Village,132,Saurashtra University,121,22.290501,70.743698,12
-159,Akshar Vatika(Mavadi),460,Om Residency (Morbi road Crosing),481,22.327999,70.8162,64
-160,Tramba Village,132,Trikon baug,21,22.295462,70.801727,66
-161,AIIM Hospital,1410,Shivdhara Residency,1449,22.31159,70.828644,142
-162,Arpit eng. Collage (Hadala Gam),482,Saurashtra University,121,22.290501,70.743698,68
-163,Trikon baug,21,Arpit eng. Collage (Hadala Gam),482,22.435499,70.781601,71
-164,Saurashtra University,121,huseni chawk (kothariya),77,22.220501,70.804001,72
-165,huseni chawk (kothariya),77,Saurashtra University,121,22.290501,70.743698,73
-166,Greenland Chowk,1112,Tramba Village,1582,22.228109,70.910812,165
-167,Ghanteshvar S.R.P. Camp (G company),229,Punit Nagar (jetco 66 k.v.a.),317,22.248899,70.794403,77
+0,CAPE TOWN,1,CHRIS HANI,16,-34.054706,18.710708,1
+1,CAPE TOWN,1,KAPTEINSKLIP,22,-34.067559,18.620534,2
+2,CAPE TOWN,1,NOLUNGILE,12,-34.016812,18.649024,3
+3,BELLVILLE,23,MAITLAND,2,-33.924651,18.487001,4
+4,SIMON'S TOWN,29,CAPE TOWN,1,-33.923631,18.427186,5
+5,CAPE TOWN,1,RETREAT,39,-34.059909,18.463013,6
+6,CAPE TOWN,1,BELLVILLE,23,-33.906263,18.626621,7
+7,KRAAIFONTEIN,72,CAPE TOWN,1,-33.923631,18.427186,8
+8,EERSTE RIVER,83,CAPE TOWN,1,-33.923631,18.427186,9
+9,STRAND,87,CAPE TOWN,1,-33.923631,18.427186,10
+10,DU TOIT,92,CAPE TOWN,1,-33.923631,18.427186,11
+11,WELLINGTON,96,CAPE TOWN,1,-33.923631,18.427186,12
+12,CAPE TOWN,1,MALMESBURY,109,-33.467954,18.722366,13
+13,PRETORIA,110,PIENAARSPOORT,122,-25.734672,28.426969,14
+14,PRETORIA,110,MABOPANE,131,-25.495963,28.089659,15
+15,MABOPANE,131,BELLE-OMBRE,132,-25.737405,28.178914,16
+16,WINTERSNEST,128,DE WILDT,136,-25.624641,27.944111,17
+17,HERCULES,124,KOEDOESPOORT,117,-25.726081,28.278726,18
+18,PRETORIA,110,SAULSVILLE,141,-25.764144,28.062129,19
+19,GERMISTON,142,LERALLA,148,-26.029177,28.196412,20
+20,GERMISTON,142,KWESINE,153,-26.365394,28.152781,21
+21,PRETORIA,110,IRENE,156,-25.875543,28.224083,22
+22,JOHANNESBURG,157,GERMISTON,142,-26.209629,28.16775,23
+23,PRETORIA,110,KEMPTON PARK,145,-26.106273,28.227334,24
+24,JOHANNESBURG,157,RANDFONTEIN,173,-26.181723,27.697782,25
+25,LANGLAAGTE,165,NALEDI,183,-26.257998,27.822762,26
+26,JOHANNESBURG,157,LENZ,191,-26.31952,27.822967,27
+27,DURBAN,192,UMLAZI,205,-29.953969,30.86603,28
+28,BEREA ROAD,193,BRIDGE CITY,215,-29.726915,30.986442,29
+29,DURBAN,192,WINKLESPRUIT,223,-30.098584,30.856763,30
+30,DURBAN,192,CATO RIDGE,240,-29.731996,30.587661,31
+31,DURBAN,192,PINETOWN,250,-29.817915,30.85794,32
+32,DURBAN YARD,251,CROSSMOOR,256,-29.898514,30.861926,33
+33,EAST LONDON,257,BERLIN,274,-32.88196,27.583002,34
+34,Johannesburg Park Station,10001,Durban Bus Station,10002,-29.8447,31.0225,1001
+35,Durban Bus Station,10002,Johannesburg Park Station,10001,-26.2041,28.043,1002
+36,Cape Town Civic Center,10003,Johannesburg Park Station,10001,-26.2041,28.043,1003
+37,Johannesburg Park Station,10001,Cape Town Civic Center,10003,-33.9199,18.4262,1004
+38,Johannesburg Park Station,10001,Matatiele,10004,-30.3436,28.8116,1005
+39,Matatiele,10004,Johannesburg Park Station,10001,-26.2041,28.043,1006
+40,Johannesburg Park Station,10001,Lusikisiki,10005,-31.3667,29.5833,1007
+41,Lusikisiki,10005,Johannesburg Park Station,10001,-26.2041,28.043,1008
+42,Johannesburg Park Station,10001,Mbombela (Nelspruit),10006,-25.4753,30.9694,1009
+43,Johannesburg Park Station,10001,Maputo,10007,-25.9692,32.5732,1010
+44,Kimberley Tourist Information Centre,10008,Johannesburg Park Station,10001,-26.2041,28.043,1011
+45,Johannesburg Tshiawelo Station,10009,Polokwane Grobler Street Bus Station,10010,-23.9039,29.4689,1012
+46,Durban Station,10011,Pretoria Station,10016,-25.7581,28.1892,1013
+47,Pretoria Station,10016,Durban Station,10011,-29.8447,31.0225,1014
+48,Johannesburg Park Station,10001,Maputo,10007,-25.9692,32.5732,1015
+49,Maputo,10007,Johannesburg Park Station,10001,-26.2041,28.043,1016
+50,Pretoria Station,10016,Cape Town,10041,-33.9249,18.4241,1017
+51,Saulsville Station,10042,Musina Railway Station,10053,-22.3488,30.0408,1018
+52,Tshiawelo,10054,Malamulele,10063,-22.99,30.676,1019
+53,Johannesburg,10064,Maputo,10007,-25.9692,32.5732,1020
+54,Johannesburg,10064,Phalaborwa,10065,-23.94299,31.14107,1021
+55,Pretoria,10066,Phalaborwa,10065,-23.94299,31.14107,1022
+56,Johannesburg,10064,Tzaneen,10067,-23.8332,30.1635,1023
+57,Phalaborwa,10065,Johannesburg,10064,-26.2041,28.043,1024
+58,Maputo,10007,Johannesburg,10064,-26.2041,28.043,1025
+59,Johannesburg,10064,Matola,10024,-25.9622,32.4589,1026
+60,Pretoria,10066,Matola,10024,-25.9622,32.4589,1027
+61,Pretoria,10066,Maputo,10007,-25.9692,32.5732,1028
+62,Witbank / Emalahleni,10018,Maputo,10007,-25.9692,32.5732,1029
+63,Mbombela (Nelspruit),10006,Maputo,10007,-25.9692,32.5732,1030
+64,Polokwane,10068,Johannesburg,10064,-26.2041,28.043,1031
+65,Pretoria,10066,Polokwane,10068,-23.9045,29.4576,1032
+66,Johannesburg,10064,Polokwane,10068,-23.9045,29.4576,1033
+67,Pretoria,10066,Mokopane,10044,-24.1944,29.0097,1034
+68,Phalaborwa,10065,Mokopane,10044,-24.1944,29.0097,1035
+69,Phalaborwa,10065,Tzaneen,10067,-23.8332,30.1635,1036
+70,Pretoria,10066,Tzaneen,10067,-23.8332,30.1635,1037
+71,Pretoria,10066,Maputo,10007,-25.9692,32.5732,1038
+72,Johannesburg,10064,Phalaborwa,10065,-23.94299,31.14107,1039
+73,Phalaborwa,10065,Johannesburg,10064,-26.2041,28.043,1040

@@ -3,7 +3,7 @@ import json
 import pickle
 import ast
 
-conn = sqlite3.connect('file:instance/fare_matrix_17_9.db?mode=ro', check_same_thread=False)
+conn = sqlite3.connect('file:instance/fare_matrix_prasa.db?mode=ro', check_same_thread=False)
 # conn = sqlite3.connect('file:', check_same_thread=False)
 _conn = sqlite3.connect('file:', check_same_thread=False)
 

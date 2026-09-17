@@ -33,6 +33,33 @@ bus_stops_dict = dict(zip(stops_df.stop_id, stops_df.stop_name))
 bus_route_details_dict = dict()
 bus_next_stop_dict = dict()
 
+# Operating days per route, derived from the GTFS calendar joined via trips.
+# Metro (route_type=2) runs Mon-Fri (service 1); coaches (route_type=3) run
+# all week (service 101). Loaded once at startup from the static feed.
+DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+def _load_operating_days():
+    days_by_service = {}
+    try:
+        cal = pd.read_csv(gtfs_folder + 'calendar.txt')
+        for _, row in cal.iterrows():
+            days_by_service[int(row['service_id'])] = [d for d in DAYS if int(row[d]) == 1]
+    except Exception as e:
+        print(f'calendar load failed: {e}')
+        return {}
+    trips = pd.read_csv(gtfs_folder + 'trips.txt')
+    routes = pd.read_csv(gtfs_folder + 'routes.txt')
+    route_type = dict(zip(routes.route_id.astype(str), routes.route_type))
+    days_by_route = {}
+    for _, row in trips.iterrows():
+        sid = int(row['service_id'])
+        rid = str(row['route_id'])
+        if rid not in days_by_route and sid in days_by_service:
+            days_by_route[rid] = days_by_service[sid]
+    return days_by_route
+
+operating_days_by_route = _load_operating_days()
+
 
 def set_dict():
     global bus_route_details_dict
@@ -94,6 +121,7 @@ def get_routes_func():
                     'polyline': bus_route_details_dict[route.route_id]['polyline'],
                     'trips_schedule': trips,
                     'trips_count': len(trips),
+                    'operating_days': operating_days_by_route.get(str(route.route_id), []),
                     'city': 'rkt',
                     'agency': route.agency_id
                 })
@@ -248,7 +276,7 @@ def get_routes_on_stop_func(stop_id, time=None):
         if len(next_two_times) == 0:
             next_two_times.append("NA")
         upcoming_routes.append({'route': rt.route_long_name, 'upcoming_trips_schedule': next_two_times,
-                                'end_stop': bus_stops_dict[bus_route_details_dict[rt.route_id][1]]})
+                                'end_stop': bus_stops_dict[bus_route_details_dict[rt.route_id]['end_stop']]})
 
     upcoming_routes = sorted(upcoming_routes,
                              key=lambda x: x["upcoming_trips_schedule"][0] if x["upcoming_trips_schedule"] else "")
@@ -522,6 +550,12 @@ def get_fare_options_v2(route, start_idx):
 #     return fare_list
 
 
+def fare_amount(value):
+    """Return whole-number fares as int (20, not 20.0), keep decimals as float."""
+    f = float(value)
+    return int(f) if f.is_integer() else f
+
+
 def generate_fare_options_response_v2(fare_dict):
     category_fare_list = {}
     for category, fare_options in fare_dict.items():
@@ -535,10 +569,10 @@ def generate_fare_options_response_v2(fare_dict):
                     fare_list.append({
                         "start_stop_index": start_stop_index,
                         "end_stop_index": int(idx) - 1,
-                        "basic_fare": float(current_fare['basic']),
+                        "basic_fare": fare_amount(current_fare['basic']),
                         "toll": current_fare['toll'],
-                        "total_fare": float(current_fare['total']),
-                        "amount_payable_by_user": float(current_fare['total']),
+                        "total_fare": fare_amount(current_fare['total']),
+                        "amount_payable_by_user": fare_amount(current_fare['total']),
                         "discount_percentage": 0
                     })
                 # Update variables for the new fare segment
@@ -548,10 +582,10 @@ def generate_fare_options_response_v2(fare_dict):
         fare_list.append({
             "start_stop_index": start_stop_index,
             "end_stop_index": int(idx),
-            "basic_fare": float(current_fare['basic']),
+            "basic_fare": fare_amount(current_fare['basic']),
             "toll": current_fare['toll'],
-            "total_fare": float(current_fare['total']),
-            "amount_payable_by_user": float(current_fare['total']),
+            "total_fare": fare_amount(current_fare['total']),
+            "amount_payable_by_user": fare_amount(current_fare['total']),
             "discount_percentage": 0
         })
 

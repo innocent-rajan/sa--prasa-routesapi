@@ -1,0 +1,2 @@
+feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version
+PRASA Metrorail (from nexttrain.co.za / OpenStreetMap),https://nexttrain.co.za,en,20260915,20271231,2026-09-15-metro
